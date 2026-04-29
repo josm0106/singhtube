@@ -452,8 +452,7 @@
         <div class="err" id="loginErr"></div>
         <button class="btn-primary" type="submit" id="loginBtn">로그인 / 회원가입</button>
       </form>
-      <button class="alt" id="offlineBtn">⚡ 로그인 없이 사용 (이 기기에만 저장)</button>
-      <div class="help">처음 로그인하시면 자동으로 가입됩니다.</div>
+      <div class="help">처음 로그인하시면 자동으로 가입됩니다. (이 사이트는 로그인이 필요합니다)</div>
     </div>
   </div>
 
@@ -677,17 +676,13 @@
         btn.textContent = '로그인 / 회원가입';
       }
     });
-    document.getElementById('offlineBtn').addEventListener('click', () => {
-      localStorage.setItem(LS_MODE, 'offline');
-      showLogin(false);
-      showToast('오프라인 모드 — 이 기기에만 저장됩니다');
-    });
 
     document.getElementById('authChip').addEventListener('click', () => {
       if (state.mode === 'firebase') {
         if (confirm('로그아웃 하시겠습니까?')) {
           auth.signOut();
           showToast('로그아웃 되었습니다');
+          setTimeout(() => showLogin(true), 200);
         }
       } else {
         showLogin(true);
@@ -921,18 +916,13 @@
     updateCounts();
     render();
 
-    // Decide initial mode/login
-    const remembered = localStorage.getItem(LS_MODE);
-    // If previously chose offline, don't show login. If never chose, show login.
+    // Login required: show the login modal until the user signs in
     if (!auth) {
-      // No firebase available — silent offline mode
-      state.mode = 'offline';
-      setSyncStatus('offline');
-    } else if (remembered === 'offline' && !auth.currentUser) {
-      state.mode = 'offline';
-      setSyncStatus('offline');
-    } else if (!auth.currentUser) {
-      // Wait briefly to see if onAuthStateChanged restores a session, otherwise show login
+      // No firebase available — display modal anyway with an error
+      const err = document.getElementById('loginErr');
+      if (err) err.textContent = 'Firebase 연결 실패 — 페이지를 새로고침 해주세요';
+      showLogin(true);
+    } else {
       setTimeout(() => {
         if (state.mode !== 'firebase') showLogin(true);
       }, 600);
