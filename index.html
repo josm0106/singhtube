@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="description" content="Dr. Vinay Kumar Singh 정형외과 수술 술기 영상 라이브러리 - 246개 영상을 카테고리별로 정렬" />
+<meta name="theme-color" content="#0a0a0c" />
+<title>싱튜브 · Dr. Vinay Kumar Singh — 정형외과 술기 라이브러리</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg-0:#0a0a0c; --bg-1:#111114; --bg-2:#16161a; --bg-3:#1c1c22;
+    --bg-hover:#1f1f26; --border:#25252c; --border-soft:#1d1d23;
+    --text-1:#f4f4f6; --text-2:#b6b6bf; --text-3:#76767f; --text-4:#4a4a52;
+    --accent:#ff5d5d; --accent-soft:rgba(255,93,93,0.12);
+    --gold:#ffc857; --gold-soft:rgba(255,200,87,0.14);
+    --watched:#5fbf72; --watched-soft:rgba(95,191,114,0.13);
+    --shadow-2:0 8px 40px rgba(0,0,0,.55);
+    --r-sm:8px; --r-md:12px; --r-lg:16px;
+    --header-h:60px; --sidebar-w:300px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0 }
+  html, body {
+    height:100%; background:var(--bg-0); color:var(--text-1);
+    font-family:'Pretendard','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+    font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased; overflow:hidden;
+  }
+  a { color:inherit; text-decoration:none }
+  button { font-family:inherit; cursor:pointer; border:none; background:none; color:inherit }
+  input { font-family:inherit }
+
+  .app {
+    display:grid;
+    grid-template-rows: var(--header-h) 1fr;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    grid-template-areas:"header header" "sidebar main";
+    height:100vh;
+  }
+  .header { grid-area:header }
+  .sidebar { grid-area:sidebar }
+  .main { grid-area:main }
+
+  .header {
+    display:flex; align-items:center; gap:16px; padding:0 20px;
+    background:rgba(10,10,12,.85);
+    backdrop-filter:saturate(160%) blur(14px);
+    -webkit-backdrop-filter:saturate(160%) blur(14px);
+    border-bottom:1px solid var(--border-soft); z-index:30;
+  }
+  .brand { display:flex; align-items:center; gap:10px; font-weight:700; font-size:15px; letter-spacing:-0.01em; white-space:nowrap }
+  .brand .dot {
+    width:24px; height:24px; border-radius:6px;
+    background:linear-gradient(135deg,var(--accent),#ff8a5d);
+    display:inline-flex; align-items:center; justify-content:center;
+    color:#fff; font-size:12px; font-weight:800;
+  }
+  .brand .sub { color:var(--text-3); font-weight:500; font-size:13px }
+  .search { flex:1; max-width:520px; margin:0 auto; position:relative }
+  .search input {
+    width:100%; height:38px; padding:0 14px 0 38px;
+    background:var(--bg-2); border:1px solid var(--border); border-radius:var(--r-md);
+    color:var(--text-1); font-size:13px; outline:none; transition:all .15s ease;
+  }
+  .search input::placeholder { color:var(--text-3) }
+  .search input:focus { border-color:var(--accent); background:var(--bg-3); box-shadow:0 0 0 3px var(--accent-soft) }
+  .search svg.icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; color:var(--text-3) }
+
+  .sort-wrap { display:flex; gap:6px; align-items:center }
+  .sort-btn {
+    padding:7px 12px; border-radius:8px; background:var(--bg-2);
+    border:1px solid var(--border); color:var(--text-2); font-size:12.5px; font-weight:500;
+    transition:all .15s ease;
+  }
+  .sort-btn:hover { background:var(--bg-3); color:var(--text-1) }
+  .sort-btn.active { background:var(--accent-soft); border-color:rgba(255,93,93,.35); color:#ffa3a3 }
+
+  .auth-chip {
+    display:flex; align-items:center; gap:8px;
+    padding:6px 12px; border-radius:999px;
+    background:var(--bg-2); border:1px solid var(--border);
+    color:var(--text-2); font-size:12px; font-weight:500;
+    cursor:pointer; transition:all .15s ease;
+  }
+  .auth-chip:hover { color:var(--text-1); background:var(--bg-3) }
+  .auth-chip .av {
+    width:22px; height:22px; border-radius:50%;
+    background:linear-gradient(135deg,#6e8cff,#a36eff);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:11px; font-weight:700;
+  }
+  .auth-chip.online .av { background:linear-gradient(135deg,#5fbf72,#3aa84e) }
+  .auth-chip .sync-dot {
+    width:6px; height:6px; border-radius:50%;
+    background:var(--watched); margin-left:2px;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  .auth-chip.syncing .sync-dot { background:var(--gold) }
+  .auth-chip.offline .sync-dot { background:var(--text-3); animation:none }
+  @keyframes pulse {
+    0%,100% { opacity:.4; transform:scale(.8) }
+    50% { opacity:1; transform:scale(1.1) }
+  }
+
+  /* Sidebar */
+  .sidebar {
+    background:var(--bg-1); border-right:1px solid var(--border-soft);
+    overflow-y:auto; padding:12px 0;
+  }
+  .sidebar::-webkit-scrollbar { width:8px }
+  .sidebar::-webkit-scrollbar-track { background:transparent }
+  .sidebar::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px }
+  .sidebar::-webkit-scrollbar-thumb:hover { background:#2f2f37 }
+
+  .nav-item {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:9px 14px 9px 18px; margin:1px 8px; border-radius:8px;
+    color:var(--text-2); font-size:13px; cursor:pointer;
+    transition:background .12s, color .12s; user-select:none;
+  }
+  .nav-item:hover { background:var(--bg-hover); color:var(--text-1) }
+  .nav-item.active {
+    background:var(--accent-soft); color:#ffb4b4; font-weight:600;
+  }
+  .nav-item.special {
+    margin:4px 8px;
+    background:var(--bg-2); color:var(--text-1); font-weight:600;
+    border:1px solid var(--border-soft);
+  }
+  .nav-item.special.active { border-color:rgba(255,93,93,.35) }
+  .nav-item.fav.active { background:var(--gold-soft); color:#ffd97a; border-color:rgba(255,200,87,.35) }
+  .nav-item.watched.active { background:var(--watched-soft); color:#9be0ab; border-color:rgba(95,191,114,.35) }
+  .nav-count {
+    color:var(--text-3); font-size:11.5px;
+    background:rgba(255,255,255,.04); padding:1px 7px; border-radius:999px;
+    font-variant-numeric:tabular-nums; font-weight:500;
+  }
+  .nav-item.active .nav-count {
+    background:rgba(255,93,93,.18); color:#ffb4b4;
+  }
+  .nav-item.fav.active .nav-count { background:var(--gold-soft); color:#ffd97a }
+  .nav-item.watched.active .nav-count { background:var(--watched-soft); color:#9be0ab }
+
+  .group { margin-top:10px }
+  .group-header {
+    display:flex; align-items:center; gap:8px;
+    padding:8px 18px 6px 18px;
+    color:var(--text-3); font-size:11px; font-weight:600;
+    letter-spacing:.04em; text-transform:uppercase;
+    cursor:pointer; user-select:none;
+  }
+  .group-header .chev { width:10px; height:10px; transition:transform .15s ease; color:var(--text-4) }
+  .group.collapsed .chev { transform:rotate(-90deg) }
+  .group.collapsed .group-body { display:none }
+
+  .divider { height:1px; background:var(--border-soft); margin:10px 16px }
+
+  /* Main */
+  .main { overflow-y:auto; background:var(--bg-0) }
+  .main::-webkit-scrollbar { width:10px }
+  .main::-webkit-scrollbar-track { background:transparent }
+  .main::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px }
+  .main::-webkit-scrollbar-thumb:hover { background:#2f2f37 }
+
+  .player-wrap {
+    background:linear-gradient(180deg,var(--bg-1) 0%, var(--bg-0) 100%);
+    border-bottom:1px solid var(--border-soft);
+    padding:24px 32px 28px 32px;
+  }
+  .player-frame {
+    width:100%; max-width:1100px; aspect-ratio:16/9;
+    background:#000; border-radius:var(--r-lg); overflow:hidden;
+    box-shadow:var(--shadow-2); margin:0 auto;
+  }
+  .player-frame iframe { width:100%; height:100%; border:0 }
+  .player-empty {
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:10px; color:var(--text-3);
+    background:radial-gradient(ellipse at center,#18181f 0%,#0c0c10 70%);
+  }
+  .player-empty .play-icon {
+    width:48px; height:48px; border-radius:50%;
+    background:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; box-shadow:0 0 30px var(--accent-soft);
+  }
+  .player-meta { max-width:1100px; margin:14px auto 0 auto; color:var(--text-2) }
+  .player-meta .num-pill {
+    display:inline-block; background:var(--accent); color:#fff;
+    font-size:11px; font-weight:700; padding:2px 8px; border-radius:6px;
+    margin-right:8px; letter-spacing:.02em; vertical-align:middle;
+  }
+  .player-meta .ttl {
+    color:var(--text-1); font-size:16px; font-weight:600;
+    letter-spacing:-0.01em; line-height:1.4;
+  }
+  .player-meta .info {
+    margin-top:10px; font-size:12.5px; color:var(--text-3);
+    display:flex; gap:14px; flex-wrap:wrap; align-items:center;
+  }
+  .player-meta .yt-link { color:var(--accent); transition:opacity .15s }
+  .player-meta .yt-link:hover { opacity:.85 }
+  .player-meta .pact {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 12px; border-radius:8px;
+    background:var(--bg-2); border:1px solid var(--border);
+    color:var(--text-2); font-size:12.5px; font-weight:500;
+    transition:all .15s; cursor:pointer;
+  }
+  .player-meta .pact:hover { color:var(--text-1); background:var(--bg-3) }
+  .player-meta .pact.fav { color:var(--gold); border-color:rgba(255,200,87,.3); background:var(--gold-soft) }
+  .player-meta .pact.watched { color:var(--watched); border-color:rgba(95,191,114,.3); background:var(--watched-soft) }
+
+  /* List */
+  .list-wrap { padding:18px 32px 60px 32px }
+  .list-head {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:14px; gap:12px; flex-wrap:wrap;
+  }
+  .list-title { font-size:18px; font-weight:700; color:var(--text-1); letter-spacing:-0.01em }
+  .list-title .topic-en { margin-left:10px; color:var(--text-3); font-size:13px; font-weight:500 }
+  .list-title .icon { margin-right:6px; vertical-align:-2px }
+  .list-count { color:var(--text-3); font-size:12.5px; font-variant-numeric:tabular-nums }
+
+  .list { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px }
+  .card {
+    background:var(--bg-1); border:1px solid var(--border-soft);
+    border-radius:var(--r-md); overflow:hidden; cursor:pointer;
+    transition:transform .15s, border-color .15s, background .15s;
+    display:flex; flex-direction:column; position:relative;
+  }
+  .card:hover { transform:translateY(-2px); border-color:#353541; background:var(--bg-2) }
+  .card.playing {
+    border-color:var(--accent);
+    box-shadow:0 0 0 1px var(--accent),0 6px 24px rgba(255,93,93,.18);
+  }
+  .card.is-watched .thumb img { opacity:.55 }
+  .card.is-watched .card-title { color:var(--text-2) }
+  .thumb { width:100%; aspect-ratio:16/9; background:#000; position:relative; overflow:hidden }
+  .thumb img {
+    width:100%; height:100%; object-fit:cover; display:block;
+    transition:transform .4s ease, opacity .15s ease;
+  }
+  .card:hover .thumb img { transform:scale(1.04) }
+  .thumb .num-badge {
+    position:absolute; top:8px; left:8px;
+    background:rgba(0,0,0,.78); backdrop-filter:blur(4px);
+    color:#fff; font-size:11px; font-weight:700;
+    padding:3px 8px; border-radius:5px; letter-spacing:.03em;
+  }
+  .thumb .duration {
+    position:absolute; bottom:8px; right:8px;
+    background:rgba(0,0,0,.85); color:#fff;
+    font-size:11px; font-weight:600; padding:2px 6px;
+    border-radius:4px; font-variant-numeric:tabular-nums;
+  }
+  .thumb .watched-mark {
+    position:absolute; top:8px; right:42px;
+    background:var(--watched); color:#fff;
+    font-size:10px; font-weight:700;
+    padding:2px 7px; border-radius:999px;
+    box-shadow:0 2px 8px rgba(0,0,0,.4);
+    display:none;
+  }
+  .card.is-watched .watched-mark { display:inline-block }
+  .fav-btn {
+    position:absolute; top:6px; right:6px;
+    width:30px; height:30px; border-radius:50%;
+    background:rgba(0,0,0,.65); backdrop-filter:blur(4px);
+    color:#cfcfd6; display:flex; align-items:center; justify-content:center;
+    z-index:2; transition:all .15s; opacity:0;
+  }
+  .card:hover .fav-btn, .fav-btn.active { opacity:1 }
+  .fav-btn:hover { background:rgba(0,0,0,.85); transform:scale(1.08) }
+  .fav-btn.active { color:var(--gold); background:rgba(20,15,5,.85) }
+  .fav-btn svg { width:15px; height:15px }
+  .card-body { padding:11px 13px 13px 13px; display:flex; flex-direction:column; gap:6px; flex:1 }
+  .card-title {
+    font-size:13px; line-height:1.45; color:var(--text-1); font-weight:500;
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .card-meta {
+    margin-top:auto; color:var(--text-3); font-size:11.5px;
+    display:flex; align-items:center; gap:10px; font-variant-numeric:tabular-nums;
+  }
+  .card-meta .views::before { content:"👁"; margin-right:4px; opacity:.7 }
+  .card-cats { display:flex; gap:4px; flex-wrap:wrap; margin-top:2px }
+  .card-cats .tag {
+    font-size:10.5px; padding:1.5px 6px; border-radius:4px;
+    background:rgba(110,140,255,.1); color:#aabbff;
+    border:1px solid rgba(110,140,255,.18);
+  }
+
+  .empty { padding:60px 30px; text-align:center; color:var(--text-3) }
+  .empty h3 { color:var(--text-2); font-size:15px; margin-bottom:6px }
+
+  /* Login modal */
+  .modal-wrap {
+    position:fixed; inset:0; z-index:50;
+    background:rgba(5,5,7,.78);
+    backdrop-filter:blur(8px);
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-wrap.show { display:flex }
+  .modal {
+    width:100%; max-width:380px;
+    background:var(--bg-1); border:1px solid var(--border);
+    border-radius:18px; padding:28px 26px;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+    color:var(--text-1);
+  }
+  .modal h2 { font-size:20px; margin-bottom:6px; letter-spacing:-0.01em }
+  .modal p.sub { color:var(--text-3); font-size:13px; margin-bottom:22px }
+  .modal label { display:block; font-size:11.5px; color:var(--text-3); margin-bottom:6px; font-weight:600; letter-spacing:.02em; text-transform:uppercase }
+  .modal input[type=text], .modal input[type=password] {
+    width:100%; height:42px; padding:0 14px;
+    background:var(--bg-2); border:1px solid var(--border);
+    color:var(--text-1); border-radius:10px;
+    font-size:14px; outline:none; transition:all .15s;
+    margin-bottom:14px;
+  }
+  .modal input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft) }
+  .modal .btn-primary {
+    width:100%; height:44px; border-radius:10px;
+    background:linear-gradient(135deg,var(--accent),#ff8a5d);
+    color:#fff; font-size:14px; font-weight:700;
+    transition:opacity .15s;
+  }
+  .modal .btn-primary:hover { opacity:.92 }
+  .modal .btn-primary:disabled { opacity:.5; cursor:not-allowed }
+  .modal .alt {
+    width:100%; height:38px; margin-top:10px;
+    border-radius:10px; background:var(--bg-2); border:1px solid var(--border);
+    color:var(--text-2); font-size:13px;
+  }
+  .modal .alt:hover { color:var(--text-1); background:var(--bg-3) }
+  .modal .err { color:#ff8a8a; font-size:12.5px; margin-top:6px; min-height:18px }
+  .modal .help { font-size:11.5px; color:var(--text-3); margin-top:14px; text-align:center }
+
+  /* Mobile */
+  .menu-toggle { display:none }
+  @media (max-width: 900px) {
+    .app { grid-template-columns:1fr; grid-template-areas:"header" "main" }
+    .sidebar {
+      position:fixed; top:var(--header-h); left:0;
+      width:280px; height:calc(100vh - var(--header-h));
+      transform:translateX(-100%); transition:transform .25s; z-index:25;
+    }
+    .sidebar.open { transform:translateX(0) }
+    .menu-toggle { display:inline-flex }
+    .search { max-width:100% }
+    .player-wrap { padding:16px }
+    .list-wrap { padding:14px 16px 60px 16px }
+    .header { padding:0 12px; gap:10px }
+    .sort-wrap { display:none }
+    .auth-chip span.lbl { display:none }
+  }
+  .icon-btn {
+    width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center;
+    border-radius:8px; background:var(--bg-2); border:1px solid var(--border);
+    color:var(--text-2); transition:all .15s;
+  }
+  .icon-btn:hover { color:var(--text-1); background:var(--bg-3) }
+  .scrim { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:24 }
+  .scrim.show { display:block }
+
+  .toast {
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:var(--bg-3); border:1px solid var(--border);
+    color:var(--text-1); padding:10px 18px; border-radius:999px;
+    font-size:13px; font-weight:500;
+    box-shadow:0 8px 24px rgba(0,0,0,.5);
+    z-index:60; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s;
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(-4px) }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <button class="icon-btn menu-toggle" id="menuBtn" aria-label="메뉴">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <div class="brand">
+        <span class="dot">S</span>
+        <span>SinghTUBE</span>
+        <span class="sub">· @DrVinayKumarSingh</span>
+      </div>
+      <div class="search">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+        <input id="searchInput" type="search" placeholder="제목, 영상 번호, 키워드로 검색…" />
+      </div>
+      <div class="sort-wrap">
+        <button class="sort-btn active" data-sort="num-asc">번호↑</button>
+        <button class="sort-btn" data-sort="num-desc">번호↓</button>
+        <button class="sort-btn" data-sort="views-desc">조회순</button>
+      </div>
+      <button class="auth-chip offline" id="authChip" title="로그인">
+        <span class="av" id="avInit">?</span>
+        <span class="lbl" id="authLabel">로그인</span>
+        <span class="sync-dot" id="syncDot"></span>
+      </button>
+    </header>
+    <aside class="sidebar" id="sidebar">
+      <div class="nav-item special active" data-topic="__all__">
+        <span>📺  전체 영상</span>
+        <span class="nav-count" id="allCount">0</span>
+      </div>
+      <div class="nav-item special fav" data-topic="__fav__">
+        <span>⭐  즐겨찾기</span>
+        <span class="nav-count" id="favCount">0</span>
+      </div>
+      <div class="nav-item special watched" data-topic="__watched__">
+        <span>👁  시청한 영상</span>
+        <span class="nav-count" id="watchedCount">0</span>
+      </div>
+      <div class="nav-item special" data-topic="__unwatched__">
+        <span>🆕  안 본 영상</span>
+        <span class="nav-count" id="unwatchedCount">0</span>
+      </div>
+      <div class="divider"></div>
+      <div id="navGroups"></div>
+    </aside>
+    <main class="main">
+      <section class="list-wrap">
+        <div class="list-head">
+          <div class="list-title" id="listTitle">전체 영상</div>
+          <div class="list-count" id="listCount"></div>
+        </div>
+        <div class="list" id="list"></div>
+        <div class="empty" id="empty" style="display:none;">
+          <h3>표시할 영상이 없습니다</h3>
+          <p id="emptyMsg">다른 카테고리나 검색어를 시도해보세요.</p>
+        </div>
+      </section>
+    </main>
+    <div class="scrim" id="scrim"></div>
+  </div>
+
+  <!-- Login Modal -->
+  <div class="modal-wrap" id="modalWrap">
+    <div class="modal">
+      <h2>SinghTUBE 로그인 🩺</h2>
+      <p class="sub">강찬TUBE와 동일한 계정 사용 가능 — 즐겨찾기와 시청 기록을 다른 기기에서도 동기화합니다.</p>
+      <form id="loginForm" autocomplete="on">
+        <label for="lid">아이디</label>
+        <input type="text" id="lid" placeholder="ositoso (강찬TUBE와 동일)" autocomplete="username" />
+        <label for="lpw">비밀번호</label>
+        <input type="password" id="lpw" placeholder="••••••••" autocomplete="current-password" />
+        <div class="err" id="loginErr"></div>
+        <button class="btn-primary" type="submit" id="loginBtn">로그인 / 회원가입</button>
+      </form>
+      <button class="alt" id="offlineBtn">⚡ 로그인 없이 사용 (이 기기에만 저장)</button>
+      <div class="help">처음 로그인하시면 자동으로 가입됩니다.</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Firebase compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+  <script id="data" type="application/json">{"groups":[{"name":"외상·골절","topics":[{"id":"hip_fracture","kr":"고관절/대퇴골 골절","en":"Hip & Femur Fracture","count":15},{"id":"pelvis_acetabulum","kr":"골반/비구 골절","en":"Pelvis & Acetabulum Fracture","count":3},{"id":"knee_fracture","kr":"슬관절/경골고원 골절","en":"Knee & Tibial Plateau Fracture","count":8},{"id":"tibia_fibula","kr":"경골/비골 골절","en":"Tibia & Fibula Fracture","count":13},{"id":"ankle_fracture","kr":"족관절 골절","en":"Ankle Fracture","count":5},{"id":"foot_fracture","kr":"족부 골절","en":"Foot Fracture","count":3},{"id":"shoulder_fx","kr":"어깨/쇄골 골절","en":"Shoulder & Clavicle Fracture","count":8},{"id":"humerus_fx","kr":"상완골 골절","en":"Humerus Fracture","count":4},{"id":"elbow_fx","kr":"주관절/요·척골 골절","en":"Elbow / Radius / Ulna Fracture","count":12},{"id":"hand_fx","kr":"수부 골절","en":"Hand & Finger Fracture","count":6},{"id":"exfix","kr":"외고정술 (External Fixator)","en":"External Fixator","count":6},{"id":"open_fracture","kr":"개방성 골절 / 다발성","en":"Open / Polytrauma","count":1}]},{"name":"관절치환","topics":[{"id":"tkr","kr":"슬관절치환술 (TKR)","en":"Total Knee Replacement (TKR)","count":4},{"id":"thr","kr":"고관절치환술 (THR)","en":"Total Hip Replacement (THR)","count":7},{"id":"shoulder_replace","kr":"견관절치환술","en":"Shoulder Replacement","count":0},{"id":"revision","kr":"재치환술 (Revision)","en":"Revision Arthroplasty","count":3}]},{"name":"어깨·팔꿈치","topics":[{"id":"shoulder","kr":"어깨 (회전근개·관절경)","en":"Shoulder (Cuff / Arthroscopy)","count":13},{"id":"elbow","kr":"팔꿈치 (관절·인대·신경)","en":"Elbow (Joint / Ligament / Nerve)","count":19}]},{"name":"무릎","topics":[{"id":"knee_sports","kr":"무릎 (ACL/PCL/반월상연골)","en":"Knee (ACL / PCL / Meniscus)","count":9},{"id":"knee_other","kr":"무릎 (기타: 슬개골/오스굿)","en":"Knee (Patella / Osgood / Other)","count":10}]},{"name":"고관절","topics":[{"id":"hip_other","kr":"고관절 (Approach·Pathology)","en":"Hip Approach & Pathology","count":5}]},{"name":"손·손목","topics":[{"id":"hand_nerve","kr":"손 (CTS / 척골관 등)","en":"Hand (Carpal Tunnel etc.)","count":4},{"id":"hand_tendon","kr":"손 (방아쇠 손가락 / dquervain)","en":"Hand (Trigger Finger / DeQuervain)","count":13},{"id":"wrist_lig","kr":"손목 (Scapholunate / Kienbock)","en":"Wrist (Scapholunate / Kienbock)","count":8},{"id":"hand_misc","kr":"손/손목 기타","en":"Hand & Wrist Misc","count":15}]},{"name":"발·족부","topics":[{"id":"foot_fore","kr":"전족부 (무지외반증 등)","en":"Forefoot (Bunion etc.)","count":4},{"id":"foot_hind","kr":"후족부 (족저근막·아킬레스)","en":"Hindfoot (Plantar Fascia / Achilles)","count":11},{"id":"foot_other","kr":"발 기타 (변형·관절경)","en":"Foot (Other)","count":4}]},{"name":"척추","topics":[{"id":"spine","kr":"척추 (요추·경추·디스크)","en":"Spine (Lumbar / Cervical / Disc)","count":2}]},{"name":"종양·연부조직","topics":[{"id":"tumor_cyst","kr":"종양 / 낭종","en":"Tumor / Cyst","count":6},{"id":"bursa","kr":"활액낭염 (Bursitis)","en":"Bursitis","count":4},{"id":"soft_tissue","kr":"연부조직 / 인대 손상","en":"Soft Tissue / Ligament","count":17}]},{"name":"소아·기타","topics":[{"id":"pediatric","kr":"소아 정형","en":"Pediatric Orthopaedics","count":8}]},{"name":"술기·시술","topics":[{"id":"approach","kr":"수술 접근법 (Approach)","en":"Surgical Approach","count":24},{"id":"plating","kr":"플레이트 고정술 (Plating)","en":"Plating Technique","count":25},{"id":"nailing","kr":"골수강내정 고정 (Nailing)","en":"Intramedullary Nailing","count":14},{"id":"arthroscopy","kr":"관절경 (Arthroscopy)","en":"Arthroscopy","count":4},{"id":"injection_block","kr":"주사 / 신경차단","en":"Injection / Nerve Block","count":23},{"id":"cast_splint","kr":"석고붕대 / 부목","en":"Cast / Splint","count":3},{"id":"amputation","kr":"절단술 (Amputation)","en":"Amputation","count":2},{"id":"hardware_removal","kr":"금속 제거술","en":"Hardware Removal","count":4},{"id":"surgical_prep","kr":"수술 준비 / 환경","en":"Surgical Preparation / Environment","count":2}]},{"name":"검진·진찰","topics":[{"id":"exam_test","kr":"이학적 검사 / 진찰","en":"Physical Examination / Test","count":20}]},{"name":"환자교육","topics":[{"id":"event_conference","kr":"학회 / 행사","en":"Conference / Event","count":1},{"id":"patient_edu","kr":"환자 교육 (한국어/힌디어)","en":"Patient Education","count":4}]}],"topics":[{"id":"hip_fracture","kr":"고관절/대퇴골 골절","en":"Hip & Femur Fracture","group":"외상·골절"},{"id":"pelvis_acetabulum","kr":"골반/비구 골절","en":"Pelvis & Acetabulum Fracture","group":"외상·골절"},{"id":"knee_fracture","kr":"슬관절/경골고원 골절","en":"Knee & Tibial Plateau Fracture","group":"외상·골절"},{"id":"tibia_fibula","kr":"경골/비골 골절","en":"Tibia & Fibula Fracture","group":"외상·골절"},{"id":"ankle_fracture","kr":"족관절 골절","en":"Ankle Fracture","group":"외상·골절"},{"id":"foot_fracture","kr":"족부 골절","en":"Foot Fracture","group":"외상·골절"},{"id":"shoulder_fx","kr":"어깨/쇄골 골절","en":"Shoulder & Clavicle Fracture","group":"외상·골절"},{"id":"humerus_fx","kr":"상완골 골절","en":"Humerus Fracture","group":"외상·골절"},{"id":"elbow_fx","kr":"주관절/요·척골 골절","en":"Elbow / Radius / Ulna Fracture","group":"외상·골절"},{"id":"hand_fx","kr":"수부 골절","en":"Hand & Finger Fracture","group":"외상·골절"},{"id":"exfix","kr":"외고정술 (External Fixator)","en":"External Fixator","group":"외상·골절"},{"id":"open_fracture","kr":"개방성 골절 / 다발성","en":"Open / Polytrauma","group":"외상·골절"},{"id":"tkr","kr":"슬관절치환술 (TKR)","en":"Total Knee Replacement (TKR)","group":"관절치환"},{"id":"thr","kr":"고관절치환술 (THR)","en":"Total Hip Replacement (THR)","group":"관절치환"},{"id":"shoulder_replace","kr":"견관절치환술","en":"Shoulder Replacement","group":"관절치환"},{"id":"revision","kr":"재치환술 (Revision)","en":"Revision Arthroplasty","group":"관절치환"},{"id":"shoulder","kr":"어깨 (회전근개·관절경)","en":"Shoulder (Cuff / Arthroscopy)","group":"어깨·팔꿈치"},{"id":"elbow","kr":"팔꿈치 (관절·인대·신경)","en":"Elbow (Joint / Ligament / Nerve)","group":"어깨·팔꿈치"},{"id":"knee_sports","kr":"무릎 (ACL/PCL/반월상연골)","en":"Knee (ACL / PCL / Meniscus)","group":"무릎"},{"id":"knee_other","kr":"무릎 (기타: 슬개골/오스굿)","en":"Knee (Patella / Osgood / Other)","group":"무릎"},{"id":"hip_other","kr":"고관절 (Approach·Pathology)","en":"Hip Approach & Pathology","group":"고관절"},{"id":"hand_nerve","kr":"손 (CTS / 척골관 등)","en":"Hand (Carpal Tunnel etc.)","group":"손·손목"},{"id":"hand_tendon","kr":"손 (방아쇠 손가락 / dquervain)","en":"Hand (Trigger Finger / DeQuervain)","group":"손·손목"},{"id":"wrist_lig","kr":"손목 (Scapholunate / Kienbock)","en":"Wrist (Scapholunate / Kienbock)","group":"손·손목"},{"id":"hand_misc","kr":"손/손목 기타","en":"Hand & Wrist Misc","group":"손·손목"},{"id":"foot_fore","kr":"전족부 (무지외반증 등)","en":"Forefoot (Bunion etc.)","group":"발·족부"},{"id":"foot_hind","kr":"후족부 (족저근막·아킬레스)","en":"Hindfoot (Plantar Fascia / Achilles)","group":"발·족부"},{"id":"foot_other","kr":"발 기타 (변형·관절경)","en":"Foot (Other)","group":"발·족부"},{"id":"spine","kr":"척추 (요추·경추·디스크)","en":"Spine (Lumbar / Cervical / Disc)","group":"척추"},{"id":"tumor_cyst","kr":"종양 / 낭종","en":"Tumor / Cyst","group":"종양·연부조직"},{"id":"bursa","kr":"활액낭염 (Bursitis)","en":"Bursitis","group":"종양·연부조직"},{"id":"soft_tissue","kr":"연부조직 / 인대 손상","en":"Soft Tissue / Ligament","group":"종양·연부조직"},{"id":"pediatric","kr":"소아 정형","en":"Pediatric Orthopaedics","group":"소아·기타"},{"id":"approach","kr":"수술 접근법 (Approach)","en":"Surgical Approach","group":"술기·시술"},{"id":"plating","kr":"플레이트 고정술 (Plating)","en":"Plating Technique","group":"술기·시술"},{"id":"nailing","kr":"골수강내정 고정 (Nailing)","en":"Intramedullary Nailing","group":"술기·시술"},{"id":"arthroscopy","kr":"관절경 (Arthroscopy)","en":"Arthroscopy","group":"술기·시술"},{"id":"injection_block","kr":"주사 / 신경차단","en":"Injection / Nerve Block","group":"술기·시술"},{"id":"cast_splint","kr":"석고붕대 / 부목","en":"Cast / Splint","group":"술기·시술"},{"id":"amputation","kr":"절단술 (Amputation)","en":"Amputation","group":"술기·시술"},{"id":"exam_test","kr":"이학적 검사 / 진찰","en":"Physical Examination / Test","group":"검진·진찰"},{"id":"hardware_removal","kr":"금속 제거술","en":"Hardware Removal","group":"술기·시술"},{"id":"surgical_prep","kr":"수술 준비 / 환경","en":"Surgical Preparation / Environment","group":"술기·시술"},{"id":"event_conference","kr":"학회 / 행사","en":"Conference / Event","group":"환자교육"},{"id":"patient_edu","kr":"환자 교육 (한국어/힌디어)","en":"Patient Education","group":"환자교육"}],"videos":[{"order":1,"id":"CMoAnCoC8E8","title":"Excision of Olecranon Bursa and Spur","duration":1174.0,"views":0,"num":246,"kind":"main","clean":"Excision of Olecranon Bursa and Spur","cats":["elbow","bursa"]},{"order":2,"id":"58JyQGMCkoM","title":"Glomus Tumour","duration":196.0,"views":0,"num":245,"kind":"main","clean":"Glomus Tumour","cats":["tumor_cyst"]},{"order":3,"id":"HsKR0GzGsKE","title":"Extension Block Splint for Volar Plate Injury","duration":487.0,"views":0,"num":244,"kind":"main","clean":"Extension Block Splint for Volar Plate Injury","cats":["wrist_lig","hand_misc","soft_tissue","cast_splint"]},{"order":4,"id":"qrFcMHxEp50","title":"1st Stage Revision TKR(Detailed Surgical Technique)","duration":2225.0,"views":0,"num":243,"kind":"main","clean":"1st Stage Revision TKR(Detailed Surgical Technique)","cats":["tkr","revision"]},{"order":5,"id":"3BnQoLS5aHg","title":"Talonavicular Joint Dislocation(Reduction Technique)","duration":196.0,"views":0,"num":242,"kind":"main","clean":"Talonavicular Joint Dislocation(Reduction Technique)","cats":["foot_other"]},{"order":6,"id":"KlPmUZULuLM","title":"Anterolateral Approach to Proximal Tibia","duration":1318.0,"views":0,"num":241,"kind":"main","clean":"Anterolateral Approach to Proximal Tibia","cats":["tibia_fibula","approach"]},{"order":7,"id":"lwPxYhUlEss","title":"Radial Head Replacement and Ligament Repair","duration":1425.0,"views":0,"num":240,"kind":"main","clean":"Radial Head Replacement and Ligament Repair","cats":["elbow","soft_tissue"]},{"order":8,"id":"a9-PJTbz3EU","title":"Prepatellar Bursa Aspiration Technique","duration":88.0,"views":0,"num":239,"kind":"main","clean":"Prepatellar Bursa Aspiration Technique","cats":["bursa","injection_block"]},{"order":9,"id":"3Pcs1PLkpMw","title":"Judet Approach to Scapula and Plating","duration":1984.0,"views":0,"num":238,"kind":"main","clean":"Judet Approach to Scapula and Plating","cats":["shoulder_fx","approach","plating"]},{"order":10,"id":"p4ZTB2J8DTI","title":"Kocher-Langenbeck Approach and Plating of Acetabulam","duration":1718.0,"views":0,"num":237,"kind":"main","clean":"Kocher-Langenbeck Approach and Plating of Acetabulam","cats":["pelvis_acetabulum","hip_other","approach","plating"]},{"order":11,"id":"skCTi4dZ28M","title":"Austin Moore Hip Hemiarthroplasty (Surgical Technique)","duration":814.0,"views":0,"num":236,"kind":"main","clean":"Austin Moore Hip Hemiarthroplasty (Surgical Technique)","cats":["hip_fracture"]},{"order":12,"id":"MFxG1PMpllY","title":"Acromioclavicular Joint Injection (ACJ Injection Technique)","duration":436.0,"views":0,"num":235,"kind":"main","clean":"Acromioclavicular Joint Injection (ACJ Injection Technique)","cats":["shoulder","injection_block"]},{"order":13,"id":"cpVF1zMe2J8","title":"External Fixator Application of Pelvis(Iliac Crest ExFix)","duration":1171.0,"views":0,"num":234,"kind":"main","clean":"External Fixator Application of Pelvis(Iliac Crest ExFix)","cats":["pelvis_acetabulum","exfix","knee_other"]},{"order":14,"id":"kjEFTO3_eSU","title":"Winging of Scapula","duration":388.0,"views":0,"num":233,"kind":"main","clean":"Winging of Scapula","cats":["shoulder_fx","shoulder"]},{"order":15,"id":"TpEjxavw93Q","title":"Correct Sawing Technique of Bone Cuts in Total Knee Replacement(TKR)","duration":793.0,"views":0,"num":232,"kind":"main","clean":"Correct Sawing Technique of Bone Cuts in Total Knee Replacement(TKR)","cats":["tkr"]},{"order":16,"id":"jnnUKx4gHFU","title":"Revision Total Hip Replacement of Cemented THR (Detailed Step by Step Guide)","duration":2784.0,"views":0,"num":231,"kind":"main","clean":"Revision Total Hip Replacement of Cemented THR (Detailed Step by Step Guide)","cats":["thr","revision"]},{"order":17,"id":"WnZoXAGSJ0c","title":"Reduction Technique of Dreaded Posterior Sag in Proximal Femoral Nail (PFN)","duration":412.0,"views":0,"num":230,"kind":"main","clean":"Reduction Technique of Dreaded Posterior Sag in Proximal Femoral Nail (PFN)","cats":["hip_fracture","nailing"]},{"order":18,"id":"9X3TgWLc6C8","title":"Tarsal Tunnel Decompression","duration":1072.0,"views":0,"num":229,"kind":"main","clean":"Tarsal Tunnel Decompression","cats":["foot_hind"]},{"order":19,"id":"xXMB3XyHhXM","title":"Scapholunate Ligament K-wire and Repair for Acute Scapholunate Ligament Injury","duration":1400.0,"views":0,"num":228,"kind":"main","clean":"Scapholunate Ligament K-wire and Repair for Acute Scapholunate Ligament Injury","cats":["wrist_lig","soft_tissue"]},{"order":20,"id":"OUwY1U46NZ8","title":"Radial Shortening Osteotomy for Kienbock's Disease","duration":953.0,"views":0,"num":227,"kind":"main","clean":"Radial Shortening Osteotomy for Kienbock's Disease","cats":["wrist_lig"]},{"order":21,"id":"aQPihvQXdZ8","title":"Knee Spanning External Fixator Application (Detailed Surgical Technique)","duration":889.0,"views":0,"num":226,"kind":"main","clean":"Knee Spanning External Fixator Application (Detailed Surgical Technique)","cats":["exfix","knee_other"]},{"order":22,"id":"N9_9veP3r6A","title":"External Fixator/ JESS Fixator Application for Phalanx Fracture","duration":563.0,"views":0,"num":225,"kind":"main","clean":"External Fixator/ JESS Fixator Application for Phalanx Fracture","cats":["foot_fracture","hand_fx","exfix","knee_other"]},{"order":23,"id":"JpgB5AgkJIc","title":"Grisel's Syndrome (Atlanto-Axial Rotatory Subluxation)","duration":211.0,"views":0,"num":224,"kind":"main","clean":"Grisel's Syndrome (Atlanto-Axial Rotatory Subluxation)","cats":["pediatric"]},{"order":24,"id":"UugUNgf3-cg","title":"Prone Posteromedial Approach Tibial Plateau for Posteromedial and Posterolateral Condyle Plating","duration":1154.0,"views":0,"num":223,"kind":"main","clean":"Prone Posteromedial Approach Tibial Plateau for Posteromedial and Posterolateral Condyle Plating","cats":["knee_fracture","tibia_fibula","approach","plating"]},{"order":25,"id":"zbI3jGUzags","title":"Bone grafting technique for large Tibial Plateau Defect in TKR(Total Knee Replacement)","duration":597.0,"views":0,"num":222,"kind":"main","clean":"Bone grafting technique for large Tibial Plateau Defect in TKR(Total Knee Replacement)","cats":["knee_fracture","tibia_fibula","tkr"]},{"order":26,"id":"oS_x6EDL52g","title":"Scapular Dyskinesia or Sick Scapula Syndrome due to ACJ Dislocation","duration":344.0,"views":0,"num":221,"kind":"main","clean":"Scapular Dyskinesia or Sick Scapula Syndrome due to ACJ Dislocation","cats":["shoulder_fx","shoulder"]},{"order":27,"id":"kZXjKGRl5V0","title":"Dome Osteotomy for Cubitus Varus","duration":1049.0,"views":0,"num":220,"kind":"main","clean":"Dome Osteotomy for Cubitus Varus","cats":["elbow"]},{"order":28,"id":"ijNs_qxxV-Y","title":"How to wear a Lead Apron Properly","duration":365.0,"views":0,"num":219,"kind":"main","clean":"How to wear a Lead Apron Properly","cats":["surgical_prep"]},{"order":29,"id":"1jNlQyj0s94","title":"Tension Band Wiring Patella","duration":1284.0,"views":0,"num":218,"kind":"main","clean":"Tension Band Wiring Patella","cats":["knee_other","plating"]},{"order":30,"id":"ZNF3QaTIi7M","title":"Split Thickness Skin Graft Technique","duration":851.0,"views":0,"num":217,"kind":"main","clean":"Split Thickness Skin Graft Technique","cats":["soft_tissue"]},{"order":31,"id":"eo9iW18BNaE","title":"Fasciotomy for Leg Compartment Syndrome","duration":1104.0,"views":0,"num":216,"kind":"main","clean":"Fasciotomy for Leg Compartment Syndrome","cats":["soft_tissue"]},{"order":32,"id":"JIwWLIXLK_M","title":"Frosch Approach and Plating of Posterolateral Tibial Plateau","duration":1488.0,"views":0,"num":215,"kind":"main","clean":"Frosch Approach and Plating of Posterolateral Tibial Plateau","cats":["knee_fracture","tibia_fibula","approach","plating"]},{"order":33,"id":"rb1uGm0cAX8","title":"Mixed Varus and Valgus Knee (How to get perfect patella Tracking)","duration":447.0,"views":0,"num":214,"kind":"main","clean":"Mixed Varus and Valgus Knee (How to get perfect patella Tracking)","cats":["knee_other"]},{"order":34,"id":"G7KdigNLi1A","title":"Elbow Clicking due to Snapping Ulnar Nerve","duration":186.0,"views":0,"num":213,"kind":"main","clean":"Elbow Clicking due to Snapping Ulnar Nerve","cats":["elbow"]},{"order":35,"id":"keo9V3s_tz4","title":"Posteromedial Approach Tibial Plateau and Buttress Plate Fixation","duration":1165.0,"views":0,"num":212,"kind":"main","clean":"Posteromedial Approach Tibial Plateau and Buttress Plate Fixation","cats":["knee_fracture","tibia_fibula","approach","plating"]},{"order":36,"id":"ya-AzeUuR0A","title":"Function Volar Slab of Hand (How to Apply)","duration":352.0,"views":0,"num":211,"kind":"main","clean":"Function Volar Slab of Hand (How to Apply)","cats":["cast_splint"]},{"order":37,"id":"2KCg5UIAO80","title":"Arthroscopic PCL (Posterior Cruciate Ligament)Reconstruction with Hamstring Graft","duration":1906.0,"views":0,"num":210,"kind":"main","clean":"Arthroscopic PCL (Posterior Cruciate Ligament)Reconstruction with Hamstring Graft","cats":["knee_sports","soft_tissue","arthroscopy"]},{"order":38,"id":"0tUTELUtqJg","title":"Anterolateral Approach to Shoulder (McKenzie Approach)","duration":422.0,"views":0,"num":209,"kind":"main","clean":"Anterolateral Approach to Shoulder (McKenzie Approach)","cats":["approach"]},{"order":39,"id":"sGeqQeLmN00","title":"Medial Approach and Plating of Medial Tibial Condyle","duration":1208.0,"views":0,"num":208,"kind":"main","clean":"Medial Approach and Plating of Medial Tibial Condyle","cats":["tibia_fibula","approach","plating"]},{"order":40,"id":"8J7v6CDZymQ","title":"Shoulder Hemiarthroplasty (Detailed Surgical Technique)","duration":2298.0,"views":0,"num":207,"kind":"main","clean":"Shoulder Hemiarthroplasty (Detailed Surgical Technique)","cats":["hip_fracture"]},{"order":41,"id":"Jd8G8WDnOJc","title":"Greater Trochanter Reconstruction with Cercelage wire in Hip Hemiarthroplasty, THR and Revision THR","duration":421.0,"views":0,"num":206,"kind":"main","clean":"Greater Trochanter Reconstruction with Cercelage wire in Hip Hemiarthroplasty, THR and Revision THR","cats":["hip_fracture","thr","revision"]},{"order":42,"id":"RhA8AW-J5JQ","title":"Excision of Prepatellar Bursa","duration":334.0,"views":0,"num":205,"kind":"main","clean":"Excision of Prepatellar Bursa","cats":["bursa"]},{"order":43,"id":"zZYBU4Sbrnw","title":"Trigger Thumb (How to Diagnose?)","duration":349.0,"views":0,"num":204,"kind":"main","clean":"Trigger Thumb (How to Diagnose?)","cats":["hand_tendon"]},{"order":44,"id":"ECe9QdpZS_g","title":"Anteromedial Approach to Distal Femur for Medial Plating","duration":934.0,"views":0,"num":203,"kind":"main","clean":"Anteromedial Approach to Distal Femur for Medial Plating","cats":["approach","plating"]},{"order":45,"id":"NSzoJylwVVw","title":"Base of Thumb Arthritis (How to Diagnose?)","duration":349.0,"views":0,"num":202,"kind":"main","clean":"Base of Thumb Arthritis (How to Diagnose?)","cats":["hand_misc"]},{"order":46,"id":"rdQYUKXF2_8","title":"Boutonniere Deformity Correction by Central Slip Reconstruction using FDS Tendon Slip","duration":1289.0,"views":0,"num":201,"kind":"main","clean":"Boutonniere Deformity Correction by Central Slip Reconstruction using FDS Tendon Slip","cats":["hand_tendon","soft_tissue"]},{"order":47,"id":"_2SMHy343Fs","title":"How to Identify Loose Uncemented Stem of Total Hip Replacement (THR)","duration":363.0,"views":0,"num":200,"kind":"main","clean":"How to Identify Loose Uncemented Stem of Total Hip Replacement (THR)","cats":["thr"]},{"order":48,"id":"SJdf7kLnlDQ","title":"Radioulnar Synostosis (How to Diagnose?)","duration":294.0,"views":0,"num":199,"kind":"main","clean":"Radioulnar Synostosis (How to Diagnose?)","cats":["elbow"]},{"order":49,"id":"sbEa6H9GFhA","title":"Remove Poly in seconds in Revision Uncemented Total Hip Replacement","duration":185.0,"views":0,"num":198,"kind":"main","clean":"Remove Poly in seconds in Revision Uncemented Total Hip Replacement","cats":["thr"]},{"order":50,"id":"DvLD53RviwY","title":"Wrist Ganglion (How to Diagnose?)","duration":116.0,"views":0,"num":197,"kind":"main","clean":"Wrist Ganglion (How to Diagnose?)","cats":["hand_misc","tumor_cyst"]},{"order":51,"id":"gZKJNVYR7wE","title":"Insertional Achilles Tendinitis (How to Diagnose?)","duration":141.0,"views":0,"num":196,"kind":"main","clean":"Insertional Achilles Tendinitis (How to Diagnose?)","cats":["foot_hind"]},{"order":52,"id":"rBIuVxkJA9U","title":"Incarcerated Medial Epicondyle(How to Diagnose?)","duration":382.0,"views":0,"num":195,"kind":"main","clean":"Incarcerated Medial Epicondyle(How to Diagnose?)","cats":["elbow"]},{"order":53,"id":"qygiuySq1PY","title":"Boutonniere Deformity due to Central Slip Injury (How to Diagnose?)","duration":347.0,"views":0,"num":194,"kind":"main","clean":"Boutonniere Deformity due to Central Slip Injury (How to Diagnose?)","cats":["hand_tendon","soft_tissue"]},{"order":54,"id":"bGnoQhDShyE","title":"Quick Drug Free Awake Shoulder Reduction Technique","duration":247.0,"views":0,"num":193,"kind":"main","clean":"Quick Drug Free Awake Shoulder Reduction Technique","cats":["shoulder"]},{"order":55,"id":"Ed_lROkznfI","title":"Reduction Technique of Old neglected Femoral Shaft Fracture","duration":401.0,"views":0,"num":192,"kind":"main","clean":"Reduction Technique of Old neglected Femoral Shaft Fracture","cats":["hip_fracture"]},{"order":56,"id":"vLUhwOX6EjA","title":"Peroneal Tendon Subluxation Repair (Detailed Surgical Technique)","duration":1169.0,"views":0,"num":191,"kind":"main","clean":"Peroneal Tendon Subluxation Repair (Detailed Surgical Technique)","cats":["foot_hind"]},{"order":57,"id":"1yMhpICVfBU","title":"How to Diagnose Peroneal Tendon Subluxation?","duration":199.0,"views":0,"num":190,"kind":"main","clean":"How to Diagnose Peroneal Tendon Subluxation?","cats":["foot_hind"]},{"order":58,"id":"hRTpxUX_q78","title":"Hyaluronic Acid Injection Knee","duration":285.0,"views":0,"num":189,"kind":"main","clean":"Hyaluronic Acid Injection Knee","cats":["injection_block"]},{"order":59,"id":"6ixroUCQV70","title":"Dorsal or Thompson Approach of  Proximal Radius","duration":1645.0,"views":0,"num":188,"kind":"main","clean":"Dorsal or Thompson Approach of  Proximal Radius","cats":["approach"]},{"order":60,"id":"ZzgoNnD0Yqo","title":"1st CMCJ (Carpometacarpal Joint)Reduction Technique","duration":498.0,"views":0,"num":187,"kind":"main","clean":"1st CMCJ (Carpometacarpal Joint)Reduction Technique","cats":["hand_misc"]},{"order":61,"id":"E5291uchufY","title":"5th Metacarpal Fracture Transfixation technique","duration":451.0,"views":0,"num":186,"kind":"main","clean":"5th Metacarpal Fracture Transfixation technique","cats":["hand_fx"]},{"order":62,"id":"8f2bwjb2JcA","title":"Manipulation Technique of Stiff Knee","duration":203.0,"views":0,"num":185,"kind":"main","clean":"Manipulation Technique of Stiff Knee","cats":["knee_other"]},{"order":63,"id":"sd2tCWEkAc0","title":"Lag Screw Technique Ankle Fracture","duration":533.0,"views":0,"num":184,"kind":"main","clean":"Lag Screw Technique Ankle Fracture","cats":["ankle_fracture","plating"]},{"order":64,"id":"2zgoA0ZAKT8","title":"Elbow Dislocation Reduction Technique","duration":268.0,"views":0,"num":183,"kind":"main","clean":"Elbow Dislocation Reduction Technique","cats":["elbow"]},{"order":65,"id":"J8Bm5Var4K0","title":"Femur Shaft Fracture Reduction Technique","duration":366.0,"views":0,"num":182,"kind":"main","clean":"Femur Shaft Fracture Reduction Technique","cats":["hip_fracture"]},{"order":66,"id":"hWieKEI8VUY","title":"Arthroscopic ACL Repair of Tibial Spine Avulsion","duration":1003.0,"views":0,"num":181,"kind":"main","clean":"Arthroscopic ACL Repair of Tibial Spine Avulsion","cats":["knee_fracture","tibia_fibula","knee_sports","spine","arthroscopy"]},{"order":67,"id":"neT8BP0y6QM","title":"Manipulation Technique and K-wire of Pronator Type Distal Radius Fracture","duration":661.0,"views":0,"num":180,"kind":"main","clean":"Manipulation Technique and K-wire of Pronator Type Distal Radius Fracture","cats":["elbow_fx"]},{"order":68,"id":"M1xASwnitwg","title":"Dorsal Approach of Scaphoid and Screw Fixation","duration":1235.0,"views":0,"num":179,"kind":"main","clean":"Dorsal Approach of Scaphoid and Screw Fixation","cats":["wrist_lig","approach"]},{"order":69,"id":"EXmmUohZpTI","title":"Tendon Transfer for Footdrop (Bridle Procedure)","duration":2549.0,"views":0,"num":178,"kind":"main","clean":"Tendon Transfer for Footdrop (Bridle Procedure)","cats":["soft_tissue"]},{"order":70,"id":"qLb8Cfn5V_s","title":"“Biggest International Foot and Ankle event of India” SICOT-IFAS Foot & Ankle meet-SIFAM 2023 Jaipur","duration":135.0,"views":0,"num":177,"kind":"main","clean":"“Biggest International Foot and Ankle event of India” SICOT-IFAS Foot & Ankle meet-SIFAM 2023 Jaipur","cats":["event_conference"]},{"order":71,"id":"vHCUAPXXAIY","title":"Metacarpal Plating of Hand","duration":1257.0,"views":0,"num":176,"kind":"main","clean":"Metacarpal Plating of Hand","cats":["plating"]},{"order":72,"id":"tu3FgnCYA0o","title":"K-Wire Fixation of Bennett's Fracture","duration":678.0,"views":0,"num":175,"kind":"main","clean":"K-Wire Fixation of Bennett's Fracture","cats":["hand_fx"]},{"order":73,"id":"72FauFevYHU","title":"Thumb UCL (Ulnar Collateral Ligament) Repair with Suture Anchor","duration":865.0,"views":0,"num":174,"kind":"main","clean":"Thumb UCL (Ulnar Collateral Ligament) Repair with Suture Anchor","cats":["soft_tissue"]},{"order":74,"id":"Clb7l_ViTro","title":"K-wire Fixation of CMC (Carpometacarpal) Joint  Dislocation","duration":854.0,"views":0,"num":173,"kind":"main","clean":"K-wire Fixation of CMC (Carpometacarpal) Joint  Dislocation","cats":["hand_misc"]},{"order":75,"id":"KB5RlX8Eo1Q","title":"Z-Plasty of Achilles Tendon (Achilles Tendon Lengthening)","duration":931.0,"views":0,"num":172,"kind":"main","clean":"Z-Plasty of Achilles Tendon (Achilles Tendon Lengthening)","cats":["foot_hind"]},{"order":76,"id":"RJb-SpTT4Go","title":"K- wire of Colles/ Distal Radius Fracture","duration":834.0,"views":0,"num":171,"kind":"main","clean":"K- wire of Colles/ Distal Radius Fracture","cats":["elbow_fx"]},{"order":77,"id":"OtA-3Uoa1ic","title":"Ankle Fusion or Arthrodesis","duration":1280.0,"views":0,"num":170,"kind":"main","clean":"Ankle Fusion or Arthrodesis","cats":["foot_hind"]},{"order":78,"id":"RyPlKMlkaf0","title":"Removal of Limb Reconstruction System (LRS)/ External Fixator (ExFix)","duration":374.0,"views":0,"num":169,"kind":"main","clean":"Removal of Limb Reconstruction System (LRS)/ External Fixator (ExFix)","cats":["exfix"]},{"order":79,"id":"akNRJIrSYS4","title":"Radial Head Excision","duration":882.0,"views":0,"num":168,"kind":"main","clean":"Radial Head Excision","cats":["elbow"]},{"order":80,"id":"K7j3pVscaRo","title":"Intersection Syndrome Release/ Decompression","duration":805.0,"views":0,"num":167,"kind":"main","clean":"Intersection Syndrome Release/ Decompression","cats":["hand_tendon"]},{"order":81,"id":"sZMj_gq9SNI","title":"Intersection Syndrome Do you Have it?","duration":206.0,"views":0,"num":166,"kind":"main","clean":"Intersection Syndrome Do you Have it?","cats":["hand_tendon"]},{"order":82,"id":"5N4z_RcKobI","title":"Plating of Olecranon Fracture","duration":1070.0,"views":0,"num":165,"kind":"main","clean":"Plating of Olecranon Fracture","cats":["elbow_fx","plating"]},{"order":83,"id":"lTTKPOi4rP4","title":"Pipkin Type Femoral Head  Fracture Fixation","duration":455.0,"views":0,"num":164,"kind":"main","clean":"Pipkin Type Femoral Head  Fracture Fixation","cats":["hip_fracture"]},{"order":84,"id":"WzeY_xxZFF8","title":"Partial Patellectomy Surgical Technique","duration":1278.0,"views":0,"num":163,"kind":"main","clean":"Partial Patellectomy Surgical Technique","cats":["knee_fracture"]},{"order":85,"id":"rqvD7W3Rw24","title":"Wrist Injection/Aspiration Technique","duration":385.0,"views":0,"num":162,"kind":"main","clean":"Wrist Injection/Aspiration Technique","cats":["injection_block"]},{"order":86,"id":"-P-LPcsmnXo","title":"Tibiotalocalcaneal (TTC) Arthrodesis (Pantalar Fusion)","duration":1371.0,"views":0,"num":161,"kind":"main","clean":"Tibiotalocalcaneal (TTC) Arthrodesis (Pantalar Fusion)","cats":["foot_fracture"]},{"order":87,"id":"zVI0bxAKu7c","title":"Percutaneous Syndesmotic/Diastasis Screw Removal","duration":318.0,"views":0,"num":160,"kind":"main","clean":"Percutaneous Syndesmotic/Diastasis Screw Removal","cats":["hardware_removal"]},{"order":88,"id":"wXqI2sUmm90","title":"MPFL Reconstruction with Hamstring Autograft (Medial Patellofemoral Ligament Reconstruction)","duration":1273.0,"views":0,"num":159,"kind":"main","clean":"MPFL Reconstruction with Hamstring Autograft (Medial Patellofemoral Ligament Reconstruction)","cats":["knee_sports","knee_other","soft_tissue"]},{"order":89,"id":"bXcc5wOVhaE","title":"Safe Surgical Dislocation of Hip (Surgical Approach)","duration":928.0,"views":0,"num":158,"kind":"main","clean":"Safe Surgical Dislocation of Hip (Surgical Approach)","cats":["hip_other","approach"]},{"order":90,"id":"a-7OFG8NJBA","title":"Ankle Joint Injection/ Aspiration Technique","duration":314.0,"views":0,"num":157,"kind":"main","clean":"Ankle Joint Injection/ Aspiration Technique","cats":["injection_block"]},{"order":91,"id":"RCTi-5hkULo","title":"Plating of Radial Head for Radial Head and Neck Fractures","duration":1059.0,"views":0,"num":156,"kind":"main","clean":"Plating of Radial Head for Radial Head and Neck Fractures","cats":["plating"]},{"order":92,"id":"Jnsg8o14z_E","title":"Tenodermodesis for Chronic Mallet Finger Deformity","duration":516.0,"views":0,"num":155,"kind":"main","clean":"Tenodermodesis for Chronic Mallet Finger Deformity","cats":["hand_fx","hand_misc"]},{"order":93,"id":"IWdF3e5HQXE","title":"Jumbo Cutter Hack for Nail and Screw Removal","duration":392.0,"views":0,"num":154,"kind":"main","clean":"Jumbo Cutter Hack for Nail and Screw Removal","cats":["nailing","hardware_removal"]},{"order":94,"id":"1MvgvY7_mDg","title":"Cerclage Wire Patella for Multifragmentary Fracture","duration":771.0,"views":0,"num":153,"kind":"main","clean":"Cerclage Wire Patella for Multifragmentary Fracture","cats":["knee_fracture","knee_other"]},{"order":95,"id":"WcG34g4GELo","title":"Excision of Exostosis/Osteochondroma","duration":685.0,"views":0,"num":152,"kind":"main","clean":"Excision of Exostosis/Osteochondroma","cats":["tumor_cyst"]},{"order":96,"id":"RIxoyni0cKM","title":"Fluoroscopic Guided Caudal Epidural Injection","duration":420.0,"views":0,"num":151,"kind":"main","clean":"Fluoroscopic Guided Caudal Epidural Injection","cats":["injection_block"]},{"order":97,"id":"LRN_RSjLZ4Q","title":"Fluoroscopic Sacroiliac Joint Injection","duration":525.0,"views":0,"num":150,"kind":"main","clean":"Fluoroscopic Sacroiliac Joint Injection","cats":["pelvis_acetabulum","injection_block"]},{"order":98,"id":"JyvWkP4fwS0","title":"Coccydynia Injection (Ganglion Impar Block for Coccyx Pain)","duration":326.0,"views":0,"num":149,"kind":"main","clean":"Coccydynia Injection (Ganglion Impar Block for Coccyx Pain)","cats":["hand_misc","injection_block"]},{"order":99,"id":"CUSLLLmUC2k","title":"Fluoroscopic  Subtalar Joint Injection","duration":324.0,"views":0,"num":148,"kind":"main","clean":"Fluoroscopic  Subtalar Joint Injection","cats":["foot_fracture","foot_other","injection_block"]},{"order":100,"id":"mDu-pWdUEWk","title":"Chilectomy of Big Toe","duration":805.0,"views":0,"num":147,"kind":"main","clean":"Chilectomy of Big Toe","cats":["foot_fore"]},{"order":101,"id":"qci_re3zLaA","title":"'Z-Plasty' of Tensor fascia Lata for Snapping Hip","duration":862.0,"views":0,"num":146,"kind":"main","clean":"'Z-Plasty' of Tensor fascia Lata for Snapping Hip","cats":["hip_fracture"]},{"order":102,"id":"nLgwGvIVEf0","title":"De Quervains's Surgical Release","duration":480.0,"views":0,"num":145,"kind":"main","clean":"De Quervains's Surgical Release","cats":["hand_tendon"]},{"order":103,"id":"-5d9EhPrndA","title":"Modified Weaver-Dunn Procedure for Chronic ACJ Dislocation","duration":1237.0,"views":0,"num":144,"kind":"main","clean":"Modified Weaver-Dunn Procedure for Chronic ACJ Dislocation","cats":["shoulder"]},{"order":104,"id":"J-un-fjoF54","title":"Anterior Henry Approach for Proximal Radius Plating","duration":912.0,"views":0,"num":143,"kind":"main","clean":"Anterior Henry Approach for Proximal Radius Plating","cats":["approach","plating"]},{"order":105,"id":"_fNFBHaL0yM","title":"Femoral Stem Removal Technique (THR or Hemiarthoplasty)","duration":494.0,"views":0,"num":142,"kind":"main","clean":"Femoral Stem Removal Technique (THR or Hemiarthoplasty)","cats":["thr"]},{"order":106,"id":"pdLzfZW19uc","title":"Morel-Lavallée Lesion Aspiration and Sclerotherapy","duration":650.0,"views":0,"num":141,"kind":"main","clean":"Morel-Lavallée Lesion Aspiration and Sclerotherapy","cats":["injection_block"]},{"order":107,"id":"2BaipCbgSGc","title":"Delayed Presentation of Distal Radius Physeal Injury (Management)","duration":192.0,"views":0,"num":140,"kind":"main","clean":"Delayed Presentation of Distal Radius Physeal Injury (Management)","cats":["elbow_fx"]},{"order":108,"id":"4UjjxL73VMM","title":"Injection Technique for Trochanteric Bursitis","duration":248.0,"views":0,"num":139,"kind":"main","clean":"Injection Technique for Trochanteric Bursitis","cats":["bursa","injection_block"]},{"order":109,"id":"HSicwzZrmJE","title":"Colles Fracture Reduction and Plaster Technique","duration":616.0,"views":0,"num":138,"kind":"main","clean":"Colles Fracture Reduction and Plaster Technique","cats":["elbow_fx","cast_splint"]},{"order":110,"id":"gCAbVDom4_E","title":"Haglund's Deformity Excision for Insertional Achilles Tendinitis","duration":793.0,"views":0,"num":137,"kind":"main","clean":"Haglund's Deformity Excision for Insertional Achilles Tendinitis","cats":["foot_hind"]},{"order":111,"id":"3BKVOiYc8e0","title":"Wrist Arthrodesis or Fusion","duration":1177.0,"views":0,"num":136,"kind":"main","clean":"Wrist Arthrodesis or Fusion","cats":["hand_misc"]},{"order":112,"id":"sQ7_-HbXjVo","title":"Hand DIPJ Fusion with Herbert Screw (Distal Interphalangeal Joint Fusion Hand)","duration":683.0,"views":0,"num":135,"kind":"main","clean":"Hand DIPJ Fusion with Herbert Screw (Distal Interphalangeal Joint Fusion Hand)","cats":["hand_misc"]},{"order":113,"id":"Gb8Zj7YYfuk","title":"TENS Nail Removal Clavicle (Titanium Elastic Nail)","duration":315.0,"views":0,"num":134,"kind":"main","clean":"TENS Nail Removal Clavicle (Titanium Elastic Nail)","cats":["shoulder_fx","nailing"]},{"order":114,"id":"bJa3nB3PYHU","title":"Reduction Technique for Posterior Hip Dislocation (THR)","duration":377.0,"views":0,"num":133,"kind":"main","clean":"Reduction Technique for Posterior Hip Dislocation (THR)","cats":["thr"]},{"order":115,"id":"6J7txiCWFKc","title":"Removal of Tension Band Wire (TBW) Patella","duration":464.0,"views":0,"num":132,"kind":"main","clean":"Removal of Tension Band Wire (TBW) Patella","cats":["knee_other","plating"]},{"order":116,"id":"i82MIjMcIX8","title":"Finger Dislocation Reduction Technique","duration":287.0,"views":0,"num":131,"kind":"main","clean":"Finger Dislocation Reduction Technique","cats":["hand_misc"]},{"order":117,"id":"Lv7gbGFvMcA","title":"Buttress Plating of Posterior Malleolus with Posterolateral Approach","duration":706.0,"views":0,"num":130,"kind":"main","clean":"Buttress Plating of Posterior Malleolus with Posterolateral Approach","cats":["ankle_fracture","approach","plating"]},{"order":118,"id":"_hFVsGFodTc","title":"Posterolateral Approach to Ankle (Detailed Surgical Video)","duration":844.0,"views":0,"num":129,"kind":"main","clean":"Posterolateral Approach to Ankle (Detailed Surgical Video)","cats":["approach"]},{"order":119,"id":"9JqWPh5EaWM","title":"Revision Carpal Tunnel Decompression","duration":564.0,"views":0,"num":128,"kind":"main","clean":"Revision Carpal Tunnel Decompression","cats":["hand_nerve"]},{"order":120,"id":"szTpiGQr81o","title":"Paediatric Tibia TENS Nail (Titanium Elastic Nail)","duration":1047.0,"views":0,"num":127,"kind":"main","clean":"Paediatric Tibia TENS Nail (Titanium Elastic Nail)","cats":["tibia_fibula","pediatric","nailing"]},{"order":121,"id":"7fo6TM9K6eY","title":"Injection Technique for Carpal Tunnel Syndrome","duration":392.0,"views":0,"num":126,"kind":"main","clean":"Injection Technique for Carpal Tunnel Syndrome","cats":["hand_nerve","injection_block"]},{"order":122,"id":"us3AKkmsVzw","title":"Suzuki Frame Application (Pin and Rubber Dynamic Traction)","duration":1254.0,"views":0,"num":125,"kind":"main","clean":"Suzuki Frame Application (Pin and Rubber Dynamic Traction)","cats":["knee_other"]},{"order":123,"id":"uIqLQlvtv1Q","title":"Excision of Carpal Boss","duration":611.0,"views":0,"num":124,"kind":"main","clean":"Excision of Carpal Boss","cats":["hand_misc"]},{"order":124,"id":"EQOzSzVYFwY","title":"Part Preparation Technique for Surgery (When, Where and How?)","duration":569.0,"views":0,"num":123,"kind":"main","clean":"Part Preparation Technique for Surgery (When, Where and How?)","cats":["surgical_prep"]},{"order":125,"id":"wGXo4bUeMf8","title":"Screw Fixation of Incarcerated Medial Epicondyle","duration":1071.0,"views":0,"num":122,"kind":"main","clean":"Screw Fixation of Incarcerated Medial Epicondyle","cats":["elbow"]},{"order":126,"id":"O9TEccksHZE","title":"Screw Fixation and Bone Grafting for Medial Malleolus Nonunion","duration":887.0,"views":0,"num":121,"kind":"main","clean":"Screw Fixation and Bone Grafting for Medial Malleolus Nonunion","cats":["ankle_fracture"]},{"order":127,"id":"rERflVgWthc","title":"Paediatric Lateral Condyle Humerus Fixation","duration":765.0,"views":0,"num":120,"kind":"main","clean":"Paediatric Lateral Condyle Humerus Fixation","cats":["pediatric"]},{"order":128,"id":"DccIv0-l7Tw","title":"Fixation Technique of Vertical Medial Malleolus Fracture","duration":736.0,"views":0,"num":119,"kind":"main","clean":"Fixation Technique of Vertical Medial Malleolus Fracture","cats":["ankle_fracture"]},{"order":129,"id":"eyiGwVqCHHI","title":"Deltoid Ligament Repair with Suture Anchor","duration":1174.0,"views":0,"num":118,"kind":"main","clean":"Deltoid Ligament Repair with Suture Anchor","cats":["soft_tissue"]},{"order":130,"id":"uO6pRc8EOLk","title":"Tension Band Wiring of Olecranon","duration":1395.0,"views":0,"num":117,"kind":"main","clean":"Tension Band Wiring of Olecranon","cats":["elbow","plating"]},{"order":131,"id":"8TfzEMlDtyk","title":"De Quervain's Tenosynovitis Injection Technique","duration":255.0,"views":0,"num":116,"kind":"main","clean":"De Quervain's Tenosynovitis Injection Technique","cats":["hand_tendon","injection_block"]},{"order":132,"id":"n9XzXkrDeuU","title":"Trigger Finger Injection Technique","duration":428.0,"views":0,"num":115,"kind":"main","clean":"Trigger Finger Injection Technique","cats":["hand_tendon","injection_block"]},{"order":133,"id":"_0o7pYNp2-8","title":"Removal of Volar Wrist Plate","duration":820.0,"views":0,"num":114,"kind":"main","clean":"Removal of Volar Wrist Plate","cats":["hardware_removal"]},{"order":134,"id":"tq4G6eKv9cw","title":"Intramedullary Nailing of Humerus (Detailed Operative Technique)","duration":1465.0,"views":0,"num":113,"kind":"main","clean":"Intramedullary Nailing of Humerus (Detailed Operative Technique)","cats":["nailing"]},{"order":135,"id":"jIiltJZhenY","title":"Comprehensive Hip Examination (Exam Based for MS, FCPS, DNB, FRCS)","duration":7977.0,"views":0,"num":112,"kind":"main","clean":"Comprehensive Hip Examination (Exam Based for MS, FCPS, DNB, FRCS)","cats":["exam_test"]},{"order":136,"id":"8LOgIuqeq30","title":"Knee Joint Aspiration or Arthrocentesis for Septic Knee","duration":333.0,"views":0,"num":111,"kind":"main","clean":"Knee Joint Aspiration or Arthrocentesis for Septic Knee","cats":["injection_block"]},{"order":137,"id":"zXik_myZTwQ","title":"Simmonds or Thompsons Test for Tendoachilles Rupture (How to diagnose TA Rupture)","duration":199.0,"views":0,"num":110,"kind":"main","clean":"Simmonds or Thompsons Test for Tendoachilles Rupture (How to diagnose TA Rupture)","cats":["foot_hind","exam_test"]},{"order":138,"id":"Dth-p3atRkI","title":"Comprehensive Spine Examination","duration":3333.0,"views":0,"num":109,"kind":"main","clean":"Comprehensive Spine Examination","cats":["spine","exam_test"]},{"order":139,"id":"OEqzaNlFboo","title":"Haematoma Block for Distal Radius Fracture","duration":319.0,"views":0,"num":108,"kind":"main","clean":"Haematoma Block for Distal Radius Fracture","cats":["elbow_fx"]},{"order":140,"id":"82kSYsTRUto","title":"MIPO Distal Tibia (Minimally Invasive Plate Osteosynthesis)","duration":1115.0,"views":0,"num":107,"kind":"main","clean":"MIPO Distal Tibia (Minimally Invasive Plate Osteosynthesis)","cats":["tibia_fibula"]},{"order":141,"id":"lThe_ZVbtv4","title":"Comprehensive Hand Examination","duration":4794.0,"views":0,"num":106,"kind":"main","clean":"Comprehensive Hand Examination","cats":["exam_test"]},{"order":142,"id":"7k0T9bW9e_A","title":"Intersection Syndrome and Steroid Injection Technique","duration":484.0,"views":0,"num":105,"kind":"main","clean":"Intersection Syndrome and Steroid Injection Technique","cats":["hand_tendon","injection_block"]},{"order":143,"id":"qWQe2CLhIvs","title":"MIPO Distal Fibula (Minimally Invasive Plate Osteosynthesis)","duration":761.0,"views":0,"num":104,"kind":"main","clean":"MIPO Distal Fibula (Minimally Invasive Plate Osteosynthesis)","cats":["tibia_fibula"]},{"order":144,"id":"AYmDkI0P2w0","title":"FHL Tendon Transfer For Chronic Achilles Tendon Rupture","duration":988.0,"views":0,"num":103,"kind":"main","clean":"FHL Tendon Transfer For Chronic Achilles Tendon Rupture","cats":["foot_hind","soft_tissue"]},{"order":145,"id":"EutL-meUILc","title":"Dry Needling for Tennis Elbow","duration":287.0,"views":0,"num":102,"kind":"main","clean":"Dry Needling for Tennis Elbow","cats":["elbow"]},{"order":146,"id":"pzZpK9ad7Y8","title":"Drop Arm Test for Massive Rotator Cuff Tear","duration":238.0,"views":0,"num":101,"kind":"main","clean":"Drop Arm Test for Massive Rotator Cuff Tear","cats":["shoulder","exam_test"]},{"order":147,"id":"tdlcyGSIiqU","title":"Lateral Closing Wedge Osteotomy for Cubitus Varus or Gunstock Deformity","duration":1269.0,"views":0,"num":100,"kind":"main","clean":"Lateral Closing Wedge Osteotomy for Cubitus Varus or Gunstock Deformity","cats":["elbow"]},{"order":148,"id":"JE-ugQXJf_4","title":"Plantar Fascitis Injection Technique","duration":387.0,"views":0,"num":99,"kind":"main","clean":"Plantar Fascitis Injection Technique","cats":["foot_hind","injection_block"]},{"order":149,"id":"1OPa_q_eBQY","title":"ACJ(Acromioclavicular Joint) Reconstruction with Loop Endobutton","duration":1436.0,"views":0,"num":98,"kind":"main","clean":"ACJ(Acromioclavicular Joint) Reconstruction with Loop Endobutton","cats":["shoulder"]},{"order":150,"id":"N2mzdCE5T0E","title":"Hoffa Fracture Fixation","duration":939.0,"views":0,"num":97,"kind":"main","clean":"Hoffa Fracture Fixation","cats":["knee_fracture"]},{"order":151,"id":"OSiPGr-1e9E","title":"Subacromial Injection for Shoulder Impingement","duration":358.0,"views":0,"num":96,"kind":"main","clean":"Subacromial Injection for Shoulder Impingement","cats":["shoulder","injection_block"]},{"order":152,"id":"zyaEeD18D0s","title":"Extensor Tendon Repair with Modified Kessler Technique","duration":1180.0,"views":0,"num":95,"kind":"main","clean":"Extensor Tendon Repair with Modified Kessler Technique","cats":["hand_tendon","soft_tissue"]},{"order":153,"id":"29JTT0uLubs","title":"Lelli's Test for ACL","duration":245.0,"views":0,"num":94,"kind":"main","clean":"Lelli's Test for ACL","cats":["knee_sports","exam_test"]},{"order":154,"id":"NvjowUNYCjM","title":"Comprehensive Wrist Examination","duration":2805.0,"views":0,"num":93,"kind":"main","clean":"Comprehensive Wrist Examination","cats":["exam_test"]},{"order":155,"id":"rg-jexqdvfw","title":"Painfree Intra-articular Injection of Knee","duration":231.0,"views":0,"num":92,"kind":"main","clean":"Painfree Intra-articular Injection of Knee","cats":["injection_block"]},{"order":156,"id":"IeTFxxYd-5Q","title":"Sequestrectomy for Chronic Osteomyelitis","duration":1012.0,"views":0,"num":91,"kind":"main","clean":"Sequestrectomy for Chronic Osteomyelitis","cats":["open_fracture"]},{"order":157,"id":"s3UKB6UdUjM","title":"Polidocanol Sclerotherapy for Aneurysmal Bone Cyst","duration":683.0,"views":0,"num":90,"kind":"main","clean":"Polidocanol Sclerotherapy for Aneurysmal Bone Cyst","cats":["tumor_cyst"]},{"order":158,"id":"Wf_cuT2Yx2Y","title":"Technique of humeral head reduction in shoulder fracture dislocation","duration":259.0,"views":0,"num":89,"kind":"main","clean":"Technique of humeral head reduction in shoulder fracture dislocation","cats":["shoulder_fx","humerus_fx"]},{"order":159,"id":"1MjMwYHmytA","title":"Fluoroscopic Shoulder Hydrodilatation for Frozen Shoulder","duration":548.0,"views":0,"num":88,"kind":"main","clean":"Fluoroscopic Shoulder Hydrodilatation for Frozen Shoulder","cats":["shoulder","injection_block"]},{"order":160,"id":"byRvT4J6FO0","title":"Radial Nerve Exploration in Posterior Approach Humerus","duration":602.0,"views":0,"num":87,"kind":"main","clean":"Radial Nerve Exploration in Posterior Approach Humerus","cats":["approach"]},{"order":161,"id":"Qy9qT2VgJPk","title":"Retrograde Supracondylar Femur Nail","duration":1157.0,"views":0,"num":86,"kind":"main","clean":"Retrograde Supracondylar Femur Nail","cats":["hip_fracture","nailing"]},{"order":162,"id":"Ni0ujZD4kiU","title":"Philos Plating with Deltopectoral Approach","duration":2421.0,"views":0,"num":85,"kind":"main","clean":"Philos Plating with Deltopectoral Approach","cats":["approach","plating"]},{"order":163,"id":"d4Z4xaITnLI","title":"TENS Nail Paediatric Radius and Ulna","duration":1222.0,"views":0,"num":84,"kind":"main","clean":"TENS Nail Paediatric Radius and Ulna","cats":["pediatric","nailing"]},{"order":164,"id":"9sKzfVlJRUw","title":"Percutaneous Cannulated Hip Screw","duration":1154.0,"views":0,"num":83,"kind":"main","clean":"Percutaneous Cannulated Hip Screw","cats":["hip_fracture"]},{"order":165,"id":"_jLkpF1MH_w","title":"Screw fixation of Talus  with Dual Approach (Anterolateral and Anteromedial)","duration":1494.0,"views":0,"num":82,"kind":"main","clean":"Screw fixation of Talus  with Dual Approach (Anterolateral and Anteromedial)","cats":["approach"]},{"order":166,"id":"WTSeMkBJ0ok","title":"K-wire Fixation or Pinning of Paediatric Distal Radius","duration":834.0,"views":0,"num":81,"kind":"main","clean":"K-wire Fixation or Pinning of Paediatric Distal Radius","cats":["elbow_fx","pediatric"]},{"order":167,"id":"xCRZDqHzfPc","title":"Spanning Ankle Delta or A Frame External Fixator","duration":1051.0,"views":0,"num":80,"kind":"main","clean":"Spanning Ankle Delta or A Frame External Fixator","cats":["exfix"]},{"order":168,"id":"FyLoE9AtpZY","title":"Removal of Buried Tiba Nail","duration":681.0,"views":0,"num":79,"kind":"main","clean":"Removal of Buried Tiba Nail","cats":["nailing"]},{"order":169,"id":"oHPrtAq0LVw","title":"Removal of Broken Femur Nail","duration":778.0,"views":0,"num":78,"kind":"main","clean":"Removal of Broken Femur Nail","cats":["hip_fracture","nailing"]},{"order":170,"id":"mSp9mLyqZsY","title":"Quadriceps Active Test for PCL","duration":129.0,"views":0,"num":77,"kind":"main","clean":"Quadriceps Active Test for PCL","cats":["knee_sports","exam_test"]},{"order":171,"id":"VUA1wT0TNL4","title":"TENS Nail of Clavicle","duration":743.0,"views":0,"num":76,"kind":"main","clean":"TENS Nail of Clavicle","cats":["shoulder_fx","nailing"]},{"order":172,"id":"ZJRxH5mRftw","title":"Fluoroscopic Intra-articular Hip Injection","duration":453.0,"views":0,"num":75,"kind":"main","clean":"Fluoroscopic Intra-articular Hip Injection","cats":["injection_block"]},{"order":173,"id":"68iiNCNlCVE","title":"Open Acromioplasty (Subacromial Decompression)","duration":606.0,"views":0,"num":74,"kind":"main","clean":"Open Acromioplasty (Subacromial Decompression)","cats":["shoulder"]},{"order":174,"id":"nyeWqDFuJoQ","title":"Intramedullary Nailing of Tibia","duration":1597.0,"views":0,"num":73,"kind":"main","clean":"Intramedullary Nailing of Tibia","cats":["tibia_fibula","nailing"]},{"order":175,"id":"7pEMcnayPcM","title":"Comprehensive Elbow Examination","duration":2769.0,"views":0,"num":72,"kind":"main","clean":"Comprehensive Elbow Examination","cats":["elbow","exam_test"]},{"order":176,"id":"qOgeLT8E2ng","title":"Pivot Shift Test for ACL","duration":163.0,"views":0,"num":71,"kind":"main","clean":"Pivot Shift Test for ACL","cats":["knee_sports","exam_test"]},{"order":177,"id":"A3icevj0lDg","title":"Hamstring Graft Preparation Technique for ACL","duration":827.0,"views":0,"num":70,"kind":"main","clean":"Hamstring Graft Preparation Technique for ACL","cats":["knee_sports"]},{"order":178,"id":"29GIgPazjTs","title":"Clavicle or Collar Bone Plate Removal","duration":648.0,"views":0,"num":69,"kind":"main","clean":"Clavicle or Collar Bone Plate Removal","cats":["shoulder_fx","hardware_removal"]},{"order":179,"id":"QVMzk03Wdr4","title":"Beginner's Guide to Knee Arthroscopy","duration":2203.0,"views":0,"num":68,"kind":"main","clean":"Beginner's Guide to Knee Arthroscopy","cats":["arthroscopy"]},{"order":180,"id":"3lAMXP27uXU","title":"Finkelstein Test","duration":141.0,"views":0,"num":67,"kind":"main","clean":"Finkelstein Test","cats":["exam_test"]},{"order":181,"id":"4StDuSTf4Ss","title":"Comprehensive Knee Examination","duration":3213.0,"views":0,"num":66,"kind":"main","clean":"Comprehensive Knee Examination","cats":["exam_test"]},{"order":182,"id":"_IF46dXTuSE","title":"Comprehensive Foot and Ankle Examination","duration":2548.0,"views":0,"num":65,"kind":"main","clean":"Comprehensive Foot and Ankle Examination","cats":["exam_test"]},{"order":183,"id":"fGUb4MQNOZA","title":"Comprehensive Shoulder Examination","duration":2032.0,"views":0,"num":64,"kind":"main","clean":"Comprehensive Shoulder Examination","cats":["exam_test"]},{"order":184,"id":"nFk8ZfLCsjw","title":"Lag Screw Technique (Small and Large Fragment)","duration":678.0,"views":0,"num":63,"kind":"main","clean":"Lag Screw Technique (Small and Large Fragment)","cats":["plating"]},{"order":185,"id":"MhohWvgt6j8","title":"Dynamic Compression Plate (DCP)- Correct Operative Technique","duration":1188.0,"views":0,"num":62,"kind":"main","clean":"Dynamic Compression Plate (DCP)- Correct Operative Technique","cats":["plating"]},{"order":186,"id":"lryrY-ptJq8","title":"Surgical Sliding Knot (Step by Step Technique)","duration":330.0,"views":0,"num":61,"kind":"main","clean":"Surgical Sliding Knot (Step by Step Technique)","cats":["arthroscopy"]},{"order":187,"id":"WeOXhWwQUkU","title":"Proximal Femoral Nail (PFN) (Detailed Surgical Technique)","duration":1064.0,"views":0,"num":60,"kind":"main","clean":"Proximal Femoral Nail (PFN) (Detailed Surgical Technique)","cats":["hip_fracture","nailing"]},{"order":188,"id":"is_JLh0NXZI","title":"Total Knee Replacement (Step by Step Guide for Beginners)","duration":3668.0,"views":0,"num":59,"kind":"main","clean":"Total Knee Replacement (Step by Step Guide for Beginners)","cats":["tkr"]},{"order":189,"id":"goLIVnscsxE","title":"Excision of Tarsal Calcaneonavicular Coalition","duration":530.0,"views":0,"num":58,"kind":"main","clean":"Excision of Tarsal Calcaneonavicular Coalition","cats":["foot_other"]},{"order":190,"id":"w7tMHXPDEcI","title":"Percutaneous K-wire of Paediatric Supracondylar Humerus fracture","duration":706.0,"views":0,"num":57,"kind":"main","clean":"Percutaneous K-wire of Paediatric Supracondylar Humerus fracture","cats":["humerus_fx","pediatric"]},{"order":191,"id":"gNLroiA0fXE","title":"Volar Locking Plate Distal Radius (Modified Henry's Approach)","duration":1774.0,"views":0,"num":56,"kind":"main","clean":"Volar Locking Plate Distal Radius (Modified Henry's Approach)","cats":["elbow_fx","approach"]},{"order":192,"id":"eQbU0mPWtsE","title":"Elson's Test for Central Slip Injury","duration":344.0,"views":0,"num":55,"kind":"main","clean":"Elson's Test for Central Slip Injury","cats":["hand_tendon","soft_tissue","exam_test"]},{"order":193,"id":"onqlcQpbPys","title":"Proximal Interphalangeal Joint Fusion Hand (PIPJ Fusion)","duration":1150.0,"views":0,"num":54,"kind":"main","clean":"Proximal Interphalangeal Joint Fusion Hand (PIPJ Fusion)","cats":["hand_misc"]},{"order":194,"id":"UIrkSoItjsM","title":"Triple Arthrodesis (Detailed Surgical Video)","duration":1002.0,"views":0,"num":53,"kind":"main","clean":"Triple Arthrodesis (Detailed Surgical Video)","cats":["foot_other"]},{"order":195,"id":"zg66TqI1MHw","title":"Gamekeeper's /Skier's Thumb and Ulnar Collateral Ligament Examination","duration":309.0,"views":0,"num":52,"kind":"main","clean":"Gamekeeper's /Skier's Thumb and Ulnar Collateral Ligament Examination","cats":["soft_tissue","exam_test"]},{"order":196,"id":"AlbKgeHpm4U","title":"Galeazzi Test or Allis Sign","duration":240.0,"views":0,"num":51,"kind":"main","clean":"Galeazzi Test or Allis Sign","cats":["elbow_fx","elbow","exam_test"]},{"order":197,"id":"gxRQBwIyQzs","title":"Proximal Fibular Osteotomy (Detailed HD Surgical Video)","duration":859.0,"views":0,"num":50,"kind":"main","clean":"Proximal Fibular Osteotomy (Detailed HD Surgical Video)","cats":["tibia_fibula"]},{"order":198,"id":"NrFHwtLAwFk","title":"Hardinge or Lateral Approach Bipolar Hip Hemiarthroplasty (Detailed HD Surgical Video)","duration":1862.0,"views":0,"num":49,"kind":"main","clean":"Hardinge or Lateral Approach Bipolar Hip Hemiarthroplasty (Detailed HD Surgical Video)","cats":["hip_fracture","hip_other","approach"]},{"order":199,"id":"KqlvEhKTNWI","title":"Capitellum Fracture Fixation (Detailed HD Surgical Video)","duration":927.0,"views":0,"num":48,"kind":"main","clean":"Capitellum Fracture Fixation (Detailed HD Surgical Video)","cats":["elbow_fx","elbow"]},{"order":200,"id":"MNzsiAYad0g","title":"डॉ। विनय सिंह द्वारा एक साथ दोनों घुटने के प्रत्यारोपण के बाद का चमत्कार","duration":246.0,"views":0,"num":47,"kind":"main","clean":"डॉ। विनय सिंह द्वारा एक साथ दोनों घुटने के प्रत्यारोपण के बाद का चमत्कार","cats":["patient_edu"]},{"order":201,"id":"vFrstYP_if0","title":"Forearm Radius and Ulna Plating (Henry Approach)","duration":1542.0,"views":0,"num":46,"kind":"main","clean":"Forearm Radius and Ulna Plating (Henry Approach)","cats":["approach","plating"]},{"order":202,"id":"dNfp9PyilrQ","title":"Hoffmann's Sign or Reflex","duration":94.0,"views":0,"num":45,"kind":"main","clean":"Hoffmann's Sign or Reflex","cats":["exam_test"]},{"order":203,"id":"W-tpDmSIssM","title":"Ganglion Cyst Aspiration","duration":133.0,"views":0,"num":44,"kind":"main","clean":"Ganglion Cyst Aspiration","cats":["hand_misc","tumor_cyst","injection_block"]},{"order":204,"id":"MxeEADO72vg","title":"Hybrid External Fixator Tibia (Detailed HD Surgical Video)","duration":812.0,"views":0,"num":43,"kind":"main","clean":"Hybrid External Fixator Tibia (Detailed HD Surgical Video)","cats":["tibia_fibula","exfix"]},{"order":205,"id":"-MB-TvmAIK8","title":"Cubital Tunnel Decompression or Ulnar Nerve Release (Detailed Surgical HD Video)","duration":435.0,"views":0,"num":42,"kind":"main","clean":"Cubital Tunnel Decompression or Ulnar Nerve Release (Detailed Surgical HD Video)","cats":["elbow"]},{"order":206,"id":"bwIKOqc9f98","title":"Intramedullary Nail Femur (Detailed Surgical Technique)","duration":1234.0,"views":0,"num":41,"kind":"main","clean":"Intramedullary Nail Femur (Detailed Surgical Technique)","cats":["nailing"]},{"order":207,"id":"y_OV7gqvMy8","title":"Uncemented Total Hip Replacement Surgery (Posterior Approach)","duration":2367.0,"views":0,"num":40,"kind":"main","clean":"Uncemented Total Hip Replacement Surgery (Posterior Approach)","cats":["thr","hip_other","approach"]},{"order":208,"id":"ZAM_07ISS7E","title":"Old Monteggia Radial head Dislocation treated with Ulna Osteotomy and Plating","duration":440.0,"views":0,"num":39,"kind":"main","clean":"Old Monteggia Radial head Dislocation treated with Ulna Osteotomy and Plating","cats":["elbow_fx","elbow","plating"]},{"order":209,"id":"259AhvDz3JM","title":"Bicolumnar Distal Humerus Plating with Olecranon Osteotomy (Detailed Surgical Video)","duration":821.0,"views":0,"num":38,"kind":"main","clean":"Bicolumnar Distal Humerus Plating with Olecranon Osteotomy (Detailed Surgical Video)","cats":["humerus_fx","plating"]},{"order":210,"id":"Wl5fY9SJ_Fg","title":"TENS (Titanium Elastic Nail System) for Paediatric Femur fracture","duration":586.0,"views":0,"num":37,"kind":"main","clean":"TENS (Titanium Elastic Nail System) for Paediatric Femur fracture","cats":["hip_fracture","pediatric","nailing"]},{"order":211,"id":"9coAr_n0llE","title":"Core Decompression of Hip (Single Stab Technique)","duration":344.0,"views":0,"num":36,"kind":"main","clean":"Core Decompression of Hip (Single Stab Technique)","cats":["hip_other"]},{"order":212,"id":"BQxk5HOzUvY","title":"Pubic Symphysis Plating ( Detailed Surgical Video)","duration":666.0,"views":0,"num":35,"kind":"main","clean":"Pubic Symphysis Plating ( Detailed Surgical Video)","cats":["plating"]},{"order":213,"id":"dAK18ReWQac","title":"ACL Reconstruction (ALL YOU NEED TO KNOW)","duration":1556.0,"views":0,"num":34,"kind":"main","clean":"ACL Reconstruction (ALL YOU NEED TO KNOW)","cats":["knee_sports"]},{"order":214,"id":"9RKfttXYKOE","title":"Physeal Bar Excision/ Langenskiöld procedure (Detailed HD Surgical Video)","duration":481.0,"views":0,"num":33,"kind":"main","clean":"Physeal Bar Excision/ Langenskiöld procedure (Detailed HD Surgical Video)","cats":["pediatric"]},{"order":215,"id":"I_0Bnaf9vNU","title":"Dupuytren's Contracture  Release (Partial Fasciectomy, Detailed HD Video)","duration":731.0,"views":0,"num":32,"kind":"main","clean":"Dupuytren's Contracture  Release (Partial Fasciectomy, Detailed HD Video)","cats":["hand_misc"]},{"order":216,"id":"-5PneFqVAWY","title":"Surgical Fixation of Ankle Fracture (Detailed HD Surgical Video)","duration":806.0,"views":0,"num":31,"kind":"main","clean":"Surgical Fixation of Ankle Fracture (Detailed HD Surgical Video)","cats":["ankle_fracture"]},{"order":217,"id":"zk11lQqc8qY","title":"Below Knee Amputation with Skew Flap (Detailed HD Video)","duration":880.0,"views":0,"num":30,"kind":"main","clean":"Below Knee Amputation with Skew Flap (Detailed HD Video)","cats":["amputation"]},{"order":218,"id":"owI-aWBeKjE","title":"Carpal Tunnel Decompression in 5 minutes (Detailed HD Surgical Video)","duration":560.0,"views":0,"num":29,"kind":"main","clean":"Carpal Tunnel Decompression in 5 minutes (Detailed HD Surgical Video)","cats":["hand_nerve"]},{"order":219,"id":"UjOaRL9yQPM","title":"Skew Flap for Below Knee Amputation (Skin Marking for perfect Stump)","duration":498.0,"views":0,"num":28,"kind":"main","clean":"Skew Flap for Below Knee Amputation (Skin Marking for perfect Stump)","cats":["amputation"]},{"order":220,"id":"JoGEAO-okcs","title":"Clavicle or Collar Bone Plating (HD Video of Surgical Tips and Tricks)","duration":535.0,"views":0,"num":27,"kind":"main","clean":"Clavicle or Collar Bone Plating (HD Video of Surgical Tips and Tricks)","cats":["shoulder_fx","plating"]},{"order":221,"id":"laXJSWmHokM","title":"Laterjet-Patte Procedure (HD Detailed Step by Step Surgical Video)","duration":1209.0,"views":0,"num":26,"kind":"main","clean":"Laterjet-Patte Procedure (HD Detailed Step by Step Surgical Video)","cats":["shoulder"]},{"order":222,"id":"Jixh76fmSK8","title":"Fusion or Arthodesis of Big Toe (1st MTPJ Fusion)","duration":537.0,"views":0,"num":25,"kind":"main","clean":"Fusion or Arthodesis of Big Toe (1st MTPJ Fusion)","cats":["foot_fore"]},{"order":223,"id":"XzEesCuDTzA","title":"Pseudo Bennett's Fracture/ Broken Thumb treated with K-wires","duration":174.0,"views":0,"num":24,"kind":"main","clean":"Pseudo Bennett's Fracture/ Broken Thumb treated with K-wires","cats":["hand_fx"]},{"order":224,"id":"KqOSb0TC8Ss","title":"Volar Wrist Ganglion Excision (How to do it Safely)","duration":427.0,"views":0,"num":23,"kind":"main","clean":"Volar Wrist Ganglion Excision (How to do it Safely)","cats":["hand_misc","tumor_cyst"]},{"order":225,"id":"RYmtROwhaRg","title":"AcromioclaviclarJoint (ACJ) Reconstruction with Hamstring Allograft (Detailed Surgical Technique)","duration":434.0,"views":0,"num":22,"kind":"main","clean":"AcromioclaviclarJoint (ACJ) Reconstruction with Hamstring Allograft (Detailed Surgical Technique)","cats":["shoulder"]},{"order":226,"id":"6OFFmy_IWsg","title":"Hippocratic Method of Shoulder Reduction (Reduction in less than 5seconds)","duration":100.0,"views":0,"num":21,"kind":"main","clean":"Hippocratic Method of Shoulder Reduction (Reduction in less than 5seconds)","cats":["shoulder"]},{"order":227,"id":"BQWkieQtDNU","title":"How to Harvest ACL Hamstring Graft (Step by Step Surgical Technique)","duration":326.0,"views":0,"num":20,"kind":"main","clean":"How to Harvest ACL Hamstring Graft (Step by Step Surgical Technique)","cats":["knee_sports"]},{"order":228,"id":"U1iha8Cqbmg","title":"Corrective Osteotomy for Malunited Distal Radius Fracture (Detailed Step by Step Video)","duration":525.0,"views":0,"num":19,"kind":"main","clean":"Corrective Osteotomy for Malunited Distal Radius Fracture (Detailed Step by Step Video)","cats":["elbow_fx"]},{"order":229,"id":"nz0waLo6ax0","title":"DHS (Dynamic Hip Screw) for Intertrochanteric Hip Fracture (HD Video of Surgical Tips and Tricks)","duration":645.0,"views":0,"num":18,"kind":"main","clean":"DHS (Dynamic Hip Screw) for Intertrochanteric Hip Fracture (HD Video of Surgical Tips and Tricks)","cats":["hip_fracture"]},{"order":230,"id":"bX9vwhie86E","title":"Scaphoid Non-Union Treated with Bone Graft and Screw Fixation ( HD Detailed Surgical Video)","duration":404.0,"views":0,"num":17,"kind":"main","clean":"Scaphoid Non-Union Treated with Bone Graft and Screw Fixation ( HD Detailed Surgical Video)","cats":["wrist_lig"]},{"order":231,"id":"u3SDCHXndMM","title":"EIP to EPL tendon Transfer (HD Detailed Step by Step Approach)","duration":734.0,"views":0,"num":16,"kind":"main","clean":"EIP to EPL tendon Transfer (HD Detailed Step by Step Approach)","cats":["soft_tissue","approach"]},{"order":232,"id":"i9Bbf9x3aC0","title":"External Hip Snapping and Ober's Test","duration":179.0,"views":0,"num":15,"kind":"main","clean":"External Hip Snapping and Ober's Test","cats":["exam_test"]},{"order":233,"id":"W1fgx8E2UuE","title":"Hallux Valgus (Bunion) Correction-Scarf Osteotomy (Detail Surgical Video)","duration":1567.0,"views":0,"num":14,"kind":"main","clean":"Hallux Valgus (Bunion) Correction-Scarf Osteotomy (Detail Surgical Video)","cats":["foot_fore"]},{"order":234,"id":"Mu8Ddaw1nlA","title":"Tennis Elbow Release under Local Anaesthesia (Detailed Step By Step Video)","duration":867.0,"views":0,"num":13,"kind":"main","clean":"Tennis Elbow Release under Local Anaesthesia (Detailed Step By Step Video)","cats":["elbow"]},{"order":235,"id":"hnYW7u7pFs4","title":"Sauve Kapandgi Procedure (Detailed Surgical Video)","duration":1569.0,"views":0,"num":12,"kind":"main","clean":"Sauve Kapandgi Procedure (Detailed Surgical Video)","cats":["wrist_lig"]},{"order":236,"id":"fNRRrc1U3Z4","title":"Pulled Elbow  or  Nursemaid Elbow Treatment in Outpatients Clinic","duration":125.0,"views":0,"num":11,"kind":"main","clean":"Pulled Elbow  or  Nursemaid Elbow Treatment in Outpatients Clinic","cats":["elbow"]},{"order":237,"id":"gLRzs9E26S8","title":"Trigger Thumb Release (अंगूठे को फंसने से रोकने के लिए छोटे चीरे द्वारा सर्जरी)","duration":466.0,"views":0,"num":10,"kind":"main","clean":"Trigger Thumb Release (अंगूठे को फंसने से रोकने के लिए छोटे चीरे द्वारा सर्जरी)","cats":["hand_tendon","patient_edu"]},{"order":238,"id":"E6XOoS-YL3Q","title":"Piano Key Sign and Examination of DRUJ Instability","duration":169.0,"views":0,"num":9,"kind":"main","clean":"Piano Key Sign and Examination of DRUJ Instability","cats":["wrist_lig","exam_test"]},{"order":239,"id":"OFcOdPfQVYM","title":"Humerus Plating with Posterior Approach (Detailed Step by Step Approach)","duration":1022.0,"views":0,"num":8,"kind":"main","clean":"Humerus Plating with Posterior Approach (Detailed Step by Step Approach)","cats":["humerus_fx","approach","plating"]},{"order":240,"id":"rprPRbSU-ww","title":"NIMS अस्पताल में पहले कंप्यूटर नेविगेट घुटना प्रत्यारोपण  के बाद डा विनय सिंह का टीवी साक्षात्कार","duration":133.0,"views":0,"num":7,"kind":"main","clean":"NIMS अस्पताल में पहले कंप्यूटर नेविगेट घुटना प्रत्यारोपण  के बाद डा विनय सिंह का टीवी साक्षात्कार","cats":["patient_edu"]},{"order":241,"id":"pe8B_xxmsww","title":"Local Anaesthetic Injection Technique  for Pain Free Carpal Tunnel Decompression Surgery","duration":225.0,"views":0,"num":6,"kind":"main","clean":"Local Anaesthetic Injection Technique  for Pain Free Carpal Tunnel Decompression Surgery","cats":["hand_nerve","injection_block"]},{"order":242,"id":"4qGTgc-deQA","title":"गठिया के बारे में महत्वपूर्ण जानकारी पर डा विनय सिंह का टीवी साक्षात्कार","duration":2335.0,"views":0,"num":5,"kind":"main","clean":"गठिया के बारे में महत्वपूर्ण जानकारी पर डा विनय सिंह का टीवी साक्षात्कार","cats":["patient_edu"]},{"order":243,"id":"UHE_rYR_rmU","title":"Percutaneous Plantar fascia  release for Planter Fasciitis (Heel pain gone in 5 minutes)","duration":366.0,"views":0,"num":4,"kind":"main","clean":"Percutaneous Plantar fascia  release for Planter Fasciitis (Heel pain gone in 5 minutes)","cats":["foot_hind"]},{"order":244,"id":"uiMbxtJEZe0","title":"Morton's Neuroma Excision (HD Detailed Surgical Video)","duration":611.0,"views":0,"num":3,"kind":"main","clean":"Morton's Neuroma Excision (HD Detailed Surgical Video)","cats":["foot_fore"]},{"order":245,"id":"yVUxWKtRtGo","title":"Trigger Finger Release","duration":280.0,"views":0,"num":2,"kind":"main","clean":"Trigger Finger Release","cats":["hand_tendon"]},{"order":246,"id":"FWCLHypVDJI","title":"\"Percutaneous Screw Fixation\" for Scaphoid Waist Fracture","duration":151.0,"views":0,"num":1,"kind":"main","clean":"\"Percutaneous Screw Fixation\" for Scaphoid Waist Fracture","cats":["hand_fx","wrist_lig"]}],"meta":{"channel":"@DrVinayKumarSingh","channel_url":"https://www.youtube.com/@DrVinayKumarSingh","count":246}}</script>
+  <script>
+  (function(){
+    const FIREBASE_CONFIG = {"apiKey": "AIzaSyD5zH9YzZuZ90vgJqZUC-y2MefJ5Iqnji4", "authDomain": "eliteforce-97939.firebaseapp.com", "projectId": "eliteforce-97939", "storageBucket": "eliteforce-97939.firebasestorage.app", "messagingSenderId": "628068933819", "appId": "1:628068933819:web:0f423a2995d47256bc899e", "measurementId": "G-D8QWPPY4ZW"};
+    const AUTH_DOMAIN_SUFFIX = '@kangtube.app';   // shared with 강찬TUBE — same login works on both sites
+
+    const DATA = JSON.parse(document.getElementById('data').textContent);
+    const TOPICS = DATA.topics;
+    const TOPIC_BY_ID = Object.fromEntries(TOPICS.map(t => [t.id, t]));
+    const VIDEOS = DATA.videos;
+
+    let state = {
+      topic: '__all__',
+      sort: 'num-asc',
+      query: '',
+      playing: null,
+      mode: 'offline',          // 'firebase' | 'offline'
+      uid: null,
+      favorites: new Set(),
+      watched: new Set(),
+      ready: false,
+    };
+
+    // ----- Firebase init -----
+    let fb = null, auth = null, db = null, userDocRef = null, unsubDoc = null;
+    try {
+      fb = firebase.initializeApp(FIREBASE_CONFIG);
+      auth = firebase.auth();
+      db = firebase.firestore();
+      auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    } catch(e) { console.warn('Firebase init failed', e); }
+
+    const $ = (s, p=document) => p.querySelector(s);
+    const el = (tag, attrs={}, children=[]) => {
+      const e = document.createElement(tag);
+      for (const k in attrs) {
+        if (k === 'class') e.className = attrs[k];
+        else if (k === 'html') e.innerHTML = attrs[k];
+        else e.setAttribute(k, attrs[k]);
+      }
+      (Array.isArray(children) ? children : [children]).forEach(c => {
+        if (c == null) return;
+        if (typeof c === 'string') e.appendChild(document.createTextNode(c));
+        else e.appendChild(c);
+      });
+      return e;
+    };
+
+    function fmtDuration(sec) {
+      sec = Math.round(sec || 0);
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      return `${m}:${String(s).padStart(2,'0')}`;
+    }
+    function fmtViews(n) {
+      if (n >= 10000) return (n/10000).toFixed(1).replace(/\.0$/,'') + '만';
+      if (n >= 1000)  return (n/1000).toFixed(1).replace(/\.0$/,'') + '천';
+      return String(n||0);
+    }
+    function thumb(id) { return `https://i.ytimg.com/vi/${id}/mqdefault.jpg` }
+
+    function showToast(msg, ms=1500) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(()=>t.classList.remove('show'), ms);
+    }
+
+    // ----- Storage (offline) -----
+    const LS_FAV = 'singhtube_favorites_v1';
+    const LS_WATCH = 'singhtube_watched_v1';
+    const LS_MODE = 'singhtube_mode_v1';
+    function loadLocal() {
+      try { state.favorites = new Set(JSON.parse(localStorage.getItem(LS_FAV) || '[]')); } catch(e) { state.favorites = new Set(); }
+      try { state.watched = new Set(JSON.parse(localStorage.getItem(LS_WATCH) || '[]')); } catch(e) { state.watched = new Set(); }
+    }
+    function saveLocal() {
+      localStorage.setItem(LS_FAV, JSON.stringify([...state.favorites]));
+      localStorage.setItem(LS_WATCH, JSON.stringify([...state.watched]));
+    }
+
+    // ----- Sync state to Firestore (debounced) -----
+    let saveTimer = null;
+    function setSyncStatus(s) { // 'online' | 'syncing' | 'offline'
+      const chip = document.getElementById('authChip');
+      chip.classList.remove('online','syncing','offline');
+      chip.classList.add(s);
+    }
+    function pushRemote() {
+      if (state.mode !== 'firebase' || !userDocRef) return;
+      setSyncStatus('syncing');
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        userDocRef.set({
+          favorites: [...state.favorites],
+          watched: [...state.watched],
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true }).then(() => {
+          setSyncStatus('online');
+        }).catch(err => {
+          console.error(err);
+          setSyncStatus('offline');
+          showToast('동기화 실패: ' + err.code);
+        });
+      }, 350);
+    }
+
+    function applyRemoteSnapshot(snap) {
+      const d = snap && snap.data ? snap.data() : null;
+      if (!d) return;
+      if (Array.isArray(d.favorites)) state.favorites = new Set(d.favorites);
+      if (Array.isArray(d.watched))   state.watched   = new Set(d.watched);
+      saveLocal();
+      render();
+      updateCounts();
+    }
+
+    // ----- Auth flow -----
+    function showLogin(show) {
+      document.getElementById('modalWrap').classList.toggle('show', !!show);
+    }
+    function emailFromId(idStr) {
+      let id = (idStr||'').trim();
+      if (!id) return '';
+      if (id.includes('@')) return id;
+      return id + AUTH_DOMAIN_SUFFIX;
+    }
+
+    async function signInOrUp(idStr, pw) {
+      const email = emailFromId(idStr);
+      if (!email || !pw) throw new Error('아이디/비밀번호를 입력하세요');
+      try {
+        return await auth.signInWithEmailAndPassword(email, pw);
+      } catch (e) {
+        if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential' ||
+            e.code === 'auth/invalid-login-credentials') {
+          // Try to create
+          try {
+            const cred = await auth.createUserWithEmailAndPassword(email, pw);
+            return cred;
+          } catch (ce) {
+            // If it was actually a wrong password (user exists), surface that
+            if (ce.code === 'auth/email-already-in-use') {
+              throw new Error('비밀번호가 일치하지 않습니다');
+            }
+            throw ce;
+          }
+        }
+        throw e;
+      }
+    }
+
+    auth && auth.onAuthStateChanged(user => {
+      if (user) {
+        state.mode = 'firebase';
+        state.uid = user.uid;
+        localStorage.setItem(LS_MODE, 'firebase');
+        const init = (user.email || '?').charAt(0).toUpperCase();
+        document.getElementById('avInit').textContent = init;
+        document.getElementById('authLabel').textContent = (user.email || '').split('@')[0];
+        document.getElementById('authChip').classList.add('online');
+        setSyncStatus('online');
+        // Listen to user doc
+        userDocRef = db.collection('singhtubeFavorites').doc(user.uid);
+        if (unsubDoc) unsubDoc();
+        unsubDoc = userDocRef.onSnapshot(applyRemoteSnapshot, err => {
+          console.error(err);
+          setSyncStatus('offline');
+        });
+        // Initial fetch — if doc doesn't exist yet, push current local state
+        userDocRef.get().then(snap => {
+          if (!snap.exists) {
+            pushRemote();
+          } else {
+            applyRemoteSnapshot(snap);
+          }
+        });
+        showLogin(false);
+      } else {
+        state.mode = 'offline';
+        state.uid = null;
+        if (unsubDoc) { unsubDoc(); unsubDoc = null; }
+        userDocRef = null;
+        document.getElementById('avInit').textContent = '?';
+        document.getElementById('authLabel').textContent = '로그인';
+        const chip = document.getElementById('authChip');
+        chip.classList.remove('online');
+        setSyncStatus('offline');
+      }
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('lid').value.trim();
+      const pw = document.getElementById('lpw').value;
+      const err = document.getElementById('loginErr');
+      const btn = document.getElementById('loginBtn');
+      err.textContent = '';
+      btn.disabled = true;
+      btn.textContent = '처리 중…';
+      try {
+        await signInOrUp(id, pw);
+        showToast('환영합니다, ' + id + '님');
+      } catch (ex) {
+        err.textContent = (ex.message || '오류가 발생했습니다 (' + (ex.code||'') + ')');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '로그인 / 회원가입';
+      }
+    });
+    document.getElementById('offlineBtn').addEventListener('click', () => {
+      localStorage.setItem(LS_MODE, 'offline');
+      showLogin(false);
+      showToast('오프라인 모드 — 이 기기에만 저장됩니다');
+    });
+
+    document.getElementById('authChip').addEventListener('click', () => {
+      if (state.mode === 'firebase') {
+        if (confirm('로그아웃 하시겠습니까?')) {
+          auth.signOut();
+          showToast('로그아웃 되었습니다');
+        }
+      } else {
+        showLogin(true);
+      }
+    });
+
+    // ----- Favorite / Watched logic -----
+    function toggleFav(vid, ev) {
+      if (ev) { ev.stopPropagation(); ev.preventDefault(); }
+      if (state.favorites.has(vid)) state.favorites.delete(vid);
+      else state.favorites.add(vid);
+      saveLocal();
+      pushRemote();
+      // Update DOM in place
+      document.querySelectorAll(`.card[data-id="${vid}"]`).forEach(c => {
+        const btn = c.querySelector('.fav-btn');
+        if (state.favorites.has(vid)) btn.classList.add('active');
+        else btn.classList.remove('active');
+      });
+      // If current player is showing this one, update meta
+      if (state.playing === vid) updatePlayerMeta();
+      updateCounts();
+      // If filtered to favorites and unfavoriting, re-render
+      if (state.topic === '__fav__') render();
+    }
+    function markWatched(vid) {
+      if (!state.watched.has(vid)) {
+        state.watched.add(vid);
+        saveLocal();
+        pushRemote();
+        document.querySelectorAll(`.card[data-id="${vid}"]`).forEach(c => c.classList.add('is-watched'));
+        updateCounts();
+      }
+    }
+    function unmarkWatched(vid) {
+      if (state.watched.has(vid)) {
+        state.watched.delete(vid);
+        saveLocal();
+        pushRemote();
+        document.querySelectorAll(`.card[data-id="${vid}"]`).forEach(c => c.classList.remove('is-watched'));
+        updateCounts();
+        if (state.topic === '__watched__') render();
+      }
+    }
+
+    // ----- Sidebar -----
+    function buildSidebar() {
+      const root = document.getElementById('navGroups');
+      root.innerHTML = '';
+      DATA.groups.forEach(g => {
+        const wrap = el('div', {class: 'group'}, [
+          el('div', {class: 'group-header'}, [
+            el('svg', {class: 'chev', viewBox: '0 0 16 16', fill: 'currentColor', html: '<path d="M3.5 5.5 8 10l4.5-4.5"/>'}),
+            g.name,
+          ]),
+          el('div', {class: 'group-body'}),
+        ]);
+        const body = wrap.querySelector('.group-body');
+        g.topics.forEach(t => {
+          const item = el('div', {class: 'nav-item', 'data-topic': t.id}, [
+            el('span', {}, t.kr),
+            el('span', {class: 'nav-count'}, String(t.count)),
+          ]);
+          body.appendChild(item);
+        });
+        wrap.querySelector('.group-header').addEventListener('click', () => {
+          wrap.classList.toggle('collapsed');
+        });
+        root.appendChild(wrap);
+      });
+
+      document.getElementById('sidebar').addEventListener('click', (e) => {
+        const item = e.target.closest('.nav-item');
+        if (!item) return;
+        state.topic = item.dataset.topic;
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        item.classList.add('active');
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('scrim').classList.remove('show');
+        render();
+      });
+    }
+
+    function applyFilter() {
+      let arr = VIDEOS.slice();
+      if (state.topic === '__fav__') arr = arr.filter(v => state.favorites.has(v.id));
+      else if (state.topic === '__watched__') arr = arr.filter(v => state.watched.has(v.id));
+      else if (state.topic === '__unwatched__') arr = arr.filter(v => !state.watched.has(v.id));
+      else if (state.topic !== '__all__') arr = arr.filter(v => v.cats.includes(state.topic));
+
+      if (state.query) {
+        const q = state.query.toLowerCase();
+        arr = arr.filter(v => v.title.toLowerCase().includes(q) || (v.num != null && String(v.num).includes(q)));
+      }
+      if (state.sort === 'num-asc') {
+        arr.sort((a,b) => ((a.num==null?1e9:a.num) - (b.num==null?1e9:b.num)));
+      } else if (state.sort === 'num-desc') {
+        arr.sort((a,b) => ((b.num==null?-1:b.num) - (a.num==null?-1:a.num)));
+      } else if (state.sort === 'views-desc') {
+        arr.sort((a,b) => (b.views||0) - (a.views||0));
+      }
+      return arr;
+    }
+
+    function topicLabel() {
+      switch (state.topic) {
+        case '__all__': return { kr:'전체 영상', en:'All videos', icon:'📺' };
+        case '__fav__': return { kr:'즐겨찾기', en:'Favorites', icon:'⭐' };
+        case '__watched__': return { kr:'시청한 영상', en:'Watched', icon:'👁' };
+        case '__unwatched__': return { kr:'안 본 영상', en:'Unwatched', icon:'🆕' };
+      }
+      const t = TOPIC_BY_ID[state.topic];
+      return t ? { kr: t.kr, en: t.en, icon: '' } : { kr:'전체 영상', en:'', icon:'📺' };
+    }
+
+    function render() {
+      const arr = applyFilter();
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+      const empty = document.getElementById('empty');
+      empty.style.display = arr.length === 0 ? '' : 'none';
+      if (arr.length === 0) {
+        let msg = '다른 카테고리나 검색어를 시도해보세요.';
+        if (state.topic === '__fav__') msg = '아직 즐겨찾기한 영상이 없습니다. 카드 우상단의 ★ 버튼으로 추가해보세요.';
+        else if (state.topic === '__watched__') msg = '아직 시청한 영상이 없습니다.';
+        document.getElementById('emptyMsg').textContent = msg;
+      }
+
+      const tl = topicLabel();
+      const titleEl = document.getElementById('listTitle');
+      titleEl.innerHTML = '';
+      if (tl.icon) titleEl.appendChild(el('span', {class:'icon'}, tl.icon));
+      titleEl.appendChild(document.createTextNode(' ' + tl.kr));
+      if (tl.en) titleEl.appendChild(el('span', {class: 'topic-en'}, tl.en));
+      document.getElementById('listCount').textContent = `${arr.length}개`;
+
+      const frag = document.createDocumentFragment();
+      arr.forEach(v => frag.appendChild(makeCard(v)));
+      list.appendChild(frag);
+    }
+
+    function makeCard(v) {
+      const isFav = state.favorites.has(v.id);
+      const isWatched = state.watched.has(v.id);
+      const cls = ['card'];
+      if (state.playing === v.id) cls.push('playing');
+      if (isWatched) cls.push('is-watched');
+      const card = el('div', {class: cls.join(' '), 'data-id': v.id});
+
+      const thumbWrap = el('div', {class: 'thumb'}, [
+        el('img', {loading: 'lazy', src: thumb(v.id), alt: ''}),
+      ]);
+      if (v.num != null) {
+        const prefix = v.kind === 'special' ? 'S' : '#';
+        thumbWrap.appendChild(el('div', {class: 'num-badge'}, prefix + v.num));
+      }
+      if (v.duration > 0) {
+        thumbWrap.appendChild(el('div', {class: 'duration'}, fmtDuration(v.duration)));
+      }
+      thumbWrap.appendChild(el('div', {class:'watched-mark'}, '✓ 시청'));
+
+      const favBtn = el('button', {class: 'fav-btn' + (isFav ? ' active' : ''), title: isFav ? '즐겨찾기 해제' : '즐겨찾기 추가'});
+      favBtn.innerHTML = isFav
+        ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61z"/></svg>';
+      favBtn.addEventListener('click', (e) => toggleFav(v.id, e));
+      thumbWrap.appendChild(favBtn);
+
+      card.appendChild(thumbWrap);
+
+      const body = el('div', {class: 'card-body'}, [
+        el('div', {class: 'card-title'}, v.clean || v.title),
+      ]);
+      if (v.cats && v.cats.length) {
+        const tagsWrap = el('div', {class: 'card-cats'});
+        v.cats.slice(0, 2).forEach(cid => {
+          const t = TOPIC_BY_ID[cid];
+          if (t) tagsWrap.appendChild(el('span', {class: 'tag'}, t.kr));
+        });
+        body.appendChild(tagsWrap);
+      }
+      const meta = el('div', {class: 'card-meta'}, [
+        el('span', {class: 'views'}, fmtViews(v.views || 0) + '회'),
+      ]);
+      body.appendChild(meta);
+      card.appendChild(body);
+      card.addEventListener('click', () => playVideo(v));
+      return card;
+    }
+
+    function updatePlayerMeta() { /* no-op: player removed */ }
+    function playVideo(v) {
+      // Mark watched immediately and open the video on YouTube in a new tab
+      markWatched(v.id);
+      const url = `https://www.youtube.com/watch?v=${v.id}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    function updateCounts() {
+      document.getElementById('totalCount') && (document.getElementById('totalCount').textContent = VIDEOS.length);
+      document.getElementById('allCount').textContent = VIDEOS.length;
+      document.getElementById('favCount').textContent = state.favorites.size;
+      document.getElementById('watchedCount').textContent = state.watched.size;
+      document.getElementById('unwatchedCount').textContent = VIDEOS.length - state.watched.size;
+    }
+
+    /* events */
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      state.query = e.target.value.trim(); render();
+    });
+    document.querySelectorAll('.sort-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.sort = btn.dataset.sort;
+        render();
+      });
+    });
+    document.getElementById('menuBtn').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('scrim').classList.toggle('show');
+    });
+    document.getElementById('scrim').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('scrim').classList.remove('show');
+    });
+
+    // bootstrap
+    loadLocal();
+    buildSidebar();
+    updateCounts();
+    render();
+
+    // Decide initial mode/login
+    const remembered = localStorage.getItem(LS_MODE);
+    // If previously chose offline, don't show login. If never chose, show login.
+    if (!auth) {
+      // No firebase available — silent offline mode
+      state.mode = 'offline';
+      setSyncStatus('offline');
+    } else if (remembered === 'offline' && !auth.currentUser) {
+      state.mode = 'offline';
+      setSyncStatus('offline');
+    } else if (!auth.currentUser) {
+      // Wait briefly to see if onAuthStateChanged restores a session, otherwise show login
+      setTimeout(() => {
+        if (state.mode !== 'firebase') showLogin(true);
+      }, 600);
+    }
+  })();
+  </script>
+</body>
+</html>
