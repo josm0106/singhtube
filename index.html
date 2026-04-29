@@ -443,16 +443,16 @@
   <div class="modal-wrap" id="modalWrap">
     <div class="modal">
       <h2>SinghTUBE 로그인 🩺</h2>
-      <p class="sub">강찬TUBE와 동일한 계정 사용 가능 — 즐겨찾기와 시청 기록을 다른 기기에서도 동기화합니다.</p>
+      <p class="sub">허용된 계정(josm0106 또는 ososj)으로만 로그인할 수 있습니다.</p>
       <form id="loginForm" autocomplete="on">
         <label for="lid">아이디</label>
-        <input type="text" id="lid" placeholder="ositoso (강찬TUBE와 동일)" autocomplete="username" />
+        <input type="text" id="lid" placeholder="josm0106 또는 ososj" autocomplete="username" />
         <label for="lpw">비밀번호</label>
         <input type="password" id="lpw" placeholder="••••••••" autocomplete="current-password" />
         <div class="err" id="loginErr"></div>
-        <button class="btn-primary" type="submit" id="loginBtn">로그인 / 회원가입</button>
+        <button class="btn-primary" type="submit" id="loginBtn">로그인</button>
       </form>
-      <div class="help">처음 로그인하시면 자동으로 가입됩니다. (이 사이트는 로그인이 필요합니다)</div>
+      <div class="help">개인 사이트입니다. 등록된 계정만 사용 가능합니다.</div>
     </div>
   </div>
 
@@ -467,7 +467,8 @@
   <script>
   (function(){
     const FIREBASE_CONFIG = {"apiKey": "AIzaSyD5zH9YzZuZ90vgJqZUC-y2MefJ5Iqnji4", "authDomain": "eliteforce-97939.firebaseapp.com", "projectId": "eliteforce-97939", "storageBucket": "eliteforce-97939.firebasestorage.app", "messagingSenderId": "628068933819", "appId": "1:628068933819:web:0f423a2995d47256bc899e", "measurementId": "G-D8QWPPY4ZW"};
-    const AUTH_DOMAIN_SUFFIX = '@kangtube.app';   // shared with 강찬TUBE — same login works on both sites
+    const AUTH_DOMAIN_SUFFIX = '@kangtube.app';
+    const ALLOWED_IDS = ['josm0106', 'ososj'];
 
     const DATA = JSON.parse(document.getElementById('data').textContent);
     const TOPICS = DATA.topics;
@@ -595,19 +596,22 @@
     }
 
     async function signInOrUp(idStr, pw) {
-      const email = emailFromId(idStr);
-      if (!email || !pw) throw new Error('아이디/비밀번호를 입력하세요');
+      const id = (idStr||'').trim().toLowerCase();
+      if (!ALLOWED_IDS.includes(id)) {
+        throw new Error('허용되지 않은 아이디입니다. (josm0106 또는 ososj 만 가능)');
+      }
+      const email = id + AUTH_DOMAIN_SUFFIX;
+      if (!pw) throw new Error('비밀번호를 입력하세요');
       try {
         return await auth.signInWithEmailAndPassword(email, pw);
       } catch (e) {
-        if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential' ||
+        if (e.code === 'auth/user-not-found' ||
+            e.code === 'auth/invalid-credential' ||
             e.code === 'auth/invalid-login-credentials') {
-          // Try to create
+          // Account doesn't exist yet — register with the supplied password (only allowed for whitelist IDs)
           try {
-            const cred = await auth.createUserWithEmailAndPassword(email, pw);
-            return cred;
+            return await auth.createUserWithEmailAndPassword(email, pw);
           } catch (ce) {
-            // If it was actually a wrong password (user exists), surface that
             if (ce.code === 'auth/email-already-in-use') {
               throw new Error('비밀번호가 일치하지 않습니다');
             }
@@ -673,7 +677,7 @@
         err.textContent = (ex.message || '오류가 발생했습니다 (' + (ex.code||'') + ')');
       } finally {
         btn.disabled = false;
-        btn.textContent = '로그인 / 회원가입';
+        btn.textContent = '로그인';
       }
     });
 
